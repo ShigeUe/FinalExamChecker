@@ -351,7 +351,7 @@ const DEBUG_SCRIPT = async () => {
         }
         if (getFirstFontName(property.fontFamily) != datum.property.fontFamily) {
           emphasises.push(6);
-          element_messages += 'フォントファミリーが違います（' + datum.property.fontFamily + ' → ' + property.fontFamily + '）<br>';
+          element_messages += 'フォントファミリーが違います（' + datum.property.fontFamily + ' → ' + getFirstFontName(property.fontFamily) + '）<br>';
         }
         if (!property.isWebFont) {
           emphasises.push(7);
@@ -396,6 +396,7 @@ const DEBUG_SCRIPT = async () => {
       }
     }
     if (!found) {
+      result_messages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>大幅にズレているので要素が取得できません。</p></div>\n';
       PANEL.table(
         [
           "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか", "一致率",
@@ -472,38 +473,38 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     content = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceContent', { frameId, url: frameTree.frame.url });
   }
   catch (e) {
-    PANEL.add('htmlが取得できませんでした。', error);
+    PANEL.add('htmlが取得できませんでした。', 'error');
     return;
   }
   const html = content.content;
 
 
   // style.cssの取得
-  const cssFile = frameTree.resources.find((r) => r.url.match(/\/style.css$/));
+  const cssFile = frameTree.resources.find((r) => r.url.match(/\/style.css/));
   if (!cssFile) {
-    PANEL.add('style.cssが読み込まれていません。', error);
+    PANEL.add('style.cssが読み込まれていません。', 'error');
     return;
   }
   try {
     content = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceContent', { frameId, url: cssFile.url });
   }
   catch (e) {
-    PANEL.add('style.cssが取得できませんでした。', error);
+    PANEL.add('style.cssが取得できませんでした。', 'error');
     return;
   }
   const css = content.content;
 
   // main.jsの取得
-  const jsFile = frameTree.resources.find((r) => r.url.match(/\/main.js$/));
+  const jsFile = frameTree.resources.find((r) => r.url.match(/\/main.js/));
   if (!jsFile) {
-    PANEL.add('main.jsが読み込まれていません。', error);
+    PANEL.add('main.jsが読み込まれていません。', 'error');
     return;
   }
   try {
     content = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceContent', { frameId, url: jsFile.url });
   }
   catch (e) {
-    PANEL.add('main.jsが取得できませんでした。', error);
+    PANEL.add('main.jsが取得できませんでした。', 'error');
     return;
   }
   const js = content.content;
