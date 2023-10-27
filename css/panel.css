@@ -1,0 +1,84 @@
+* {
+  box-sizing: border-box;
+}
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  padding: 8px;
+  background-color: white;
+}
+.header-inner {
+  display: flex;
+  column-gap: 1rem;
+}
+#messages {
+  margin-top: 66px;
+}
+#messages > div {
+  width: fit-content;
+  padding-left: 1rem;
+  margin-bottom: 0.25rem;
+}
+#messages > div.info {
+  padding-right: 0.5rem;
+  background-color: rgb(0, 255, 0, 0.5);
+}
+#messages > div.error {
+  padding: 0;
+  margin-left: 1rem;
+  background-color: rgb(255, 0, 0, 0.5);
+}
+#messages > div.title {
+  padding: 0;
+  margin-left: 1rem;
+  font-weight: bold;
+  color: #00ffff;
+}
+#messages > div.title::before {
+  content: "■ "
+}
+#messages > .table {
+  padding: 2px;
+  border: 1px solid #282828;
+  margin-left: 1rem;
+  margin-bottom: 2px;
+}
+.row {
+  display: flex;
+}
+.row.model {
+  opacity: 0.5;
+}
+.head .row {
+  color: white;
+  background-color: #c0c;
+}
+.col {
+  width: 100px;
+  padding: 2px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col:first-child {
+  width: 400px;
+}
+.col.em {
+  background-color: #f00;
+}
+
+@media (prefers-color-scheme:dark) {
+  body, header {
+    background-color: #282828;
+    color: white;
+  }
+  .head .row {
+    background-color: #808;
+  }
+  #messages > .table {
+    border: 1px solid #eee;
+  }
+}

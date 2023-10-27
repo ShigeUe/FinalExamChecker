@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "FinalExamChecker",
+  "version": "1.0",
+  "permissions": ["debugger", "tabs"],
+  "devtools_page": "devtools.html",
+  "action": {}
+}

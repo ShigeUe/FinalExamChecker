@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div>
+        <button id="checker" type="button">チェック</button>　
+        <button id="detach" type="button">終了</button>
+      </div>
+      <div>
+        ※チェックを押すとデバッグが開始されるので、見終わったら「終了」を押してください。<br>
+        　また、要素のキャプチャを撮るので、画面が乱れます。<br>
+        　SP版の場合、チェックの後スクロールバーが出てしまうので、サイズを「レスポンシブ」→「iPhone 12 Pro」のように変更してみてください。
+      </div>
+    </div>
+  </header>
+  <div id="messages"></div>
+  <script src="js/model_data_pc.js"></script>
+  <script src="js/model_data_sp.js"></script>
+  <script src="js/highligh_config.js"></script>
+  <script src="js/panel.js"></script>
+  <script src="js/model.js"></script>
+</body>
+</html>

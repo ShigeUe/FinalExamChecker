@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Roboto+Mono:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+    font-family: "Noto Sans JP";
+}
+
+main {
+    padding: 10px 50px 40px;
+}
+
+footer {
+    text-align: center;
+    background-color: #ccc;
+}
+
+footer small {
+    font-size: 0.75rem;
+    line-height: 5em;
+}
+
+textarea {
+    width: 100%;
+    height: 400px;
+    padding: 5px;
+    border: 1px solid #222;
+    border-radius: 5px;
+    resize: vertical;
+    font-family: "Roboto Mono", "Noto Sans JP";
+    font-size: 0.875rem;
+}
+
+pre {
+    display: none;
+    width: 100%;
+    min-height: 600px;
+    padding: 5px;
+    border: 1px dashed #222;
+    font-size: 0.75rem;
+    font-family: "Roboto Mono", "Noto Sans JP";
+    white-space: pre-wrap;
+}
+
+.mt1 {
+    margin-top: 1rem;
+}
+
+.button-area {
+    display: flex;
+    justify-content: center;
+    column-gap: 20px;
+}
+
+button {
+    width: 12rem;
+    line-height: 2;
+    border-radius: 3px;
+    background-color: #080;
+    color: white;
+    font-weight: bold;
+}
+
+#html-check-button {
+    background-color: #800;
+}
+
+#css-check-button {
+    background-color: #008;
+}
+
+.validator {
+    background-color: #ccc;
+    color: #222;
+}
+
+.comment {
+    color: #0a0;
+    font-weight: bold;
+}
+
+.desc {
+    font-weight: bold;
+}
+
+.red {
+    color: red;
+    font-weight: bold;
+}
+
+.blue {
+    color: blue;
+    font-weight: bold;
+}
+.row {
+  display: flex;
+}
+.row.model {
+  opacity: 0.5;
+}
+.head .row {
+  color: white;
+  background-color: #c0c;
+}
+.col {
+  width: 100px;
+  padding: 2px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col:first-child {
+  width: 400px;
+}
+.col.em {
+  background-color: #f00;
+}
+#messages > div {
+  width: fit-content;
+  padding-left: 1rem;
+  margin-bottom: 0.25rem;
+}
+#messages > div.info {
+  padding-right: 0.5rem;
+  background-color: rgb(0, 255, 0, 0.5);
+}
+#messages > div.error {
+  padding: 0;
+  margin-left: 1rem;
+  background-color: rgb(255, 0, 0, 0.5);
+}
+#messages > div.title {
+  padding: 0;
+  margin-left: 1rem;
+  font-weight: bold;
+  color: #00ffff;
+}
+#messages > div.title::before {
+  content: "■ "
+}
+#messages > .table {
+  padding: 2px;
+  border: 1px solid #282828;
+  margin-bottom: 2px;
+}
+#messages img {
+  outline: 1px solid red;
+}
+#messages .datum {
+  border: 1px solid #888;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  width: fit-content;
+}
+/*
+@media (prefers-color-scheme:dark) {
+  body, header {
+    background-color: #282828;
+    color: white;
+  }
+  textarea {
+    border: 1px solid #ccc;
+    background-color: #282828;
+    color: white;
+  }
+  pre {
+    border: 1px dashed #ccc;
+  }
+  .head .row {
+    background-color: #808;
+  }
+  #messages > .table {
+    border: 1px solid #eee;
+  }
+}
+*/
