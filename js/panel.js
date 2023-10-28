@@ -185,8 +185,8 @@ const startDebugger = async () => {
     "DOM.getContentQuads",
     { nodeId: ROOT_BODY.nodeId },
   );
-  if (body_quads && body_quads.quads[0][2] != 1536 && body_quads.quads[0][2] != 390) {
-    PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。", "error");
+  if (!body_quads || body_quads.quads[0][2] != 1536 && body_quads.quads[0][2] != 390) {
+    PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。（検出サイズ：" + body_quads.quads[0][2] +"）", "error");
     return false;
   }
   if (body_quads.quads[0][2] == 1536) {
@@ -375,7 +375,8 @@ const DEBUG_SCRIPT = async () => {
           const capture = await chrome.debugger.sendCommand(debuggee, 'Page.captureScreenshot', captureParam);
           if (capture) {
             element_messages = '<img src="data:image/png;base64,' + capture.data + '"><br>' + element_messages;
-            element_messages += box.toString() + '<br>';
+            // デバッグ用Box情報
+            // element_messages += box.toString() + '<br>';
           }
           result_messages += '<div class="datum"><p>「' + nodeValue + '」</p>\n<p>' + element_messages + '</p></div>\n';
 
