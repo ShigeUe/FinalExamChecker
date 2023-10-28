@@ -328,7 +328,8 @@ const DEBUG_SCRIPT = async () => {
       const { nodeValue, box, property } = el;
       const overlapArea = calculateOverlapArea(datum.box, box);
       const overlapRate = overlapArea / area;
-      if (overlapRate >= 0.6) {
+      // 重なり合いが60%以上、かつ相互に文字が含まれている場合
+      if (overlapRate >= 0.6 && (nodeValue.match(datum.nodeValue.trim()) || datum.nodeValue.match(nodeValue.trim()))) {
         found = el;
         const emphasises = [];
 
@@ -374,6 +375,7 @@ const DEBUG_SCRIPT = async () => {
           const capture = await chrome.debugger.sendCommand(debuggee, 'Page.captureScreenshot', captureParam);
           if (capture) {
             element_messages = '<img src="data:image/png;base64,' + capture.data + '"><br>' + element_messages;
+            element_messages += box.toString() + '<br>';
           }
           result_messages += '<div class="datum"><p>「' + nodeValue + '」</p>\n<p>' + element_messages + '</p></div>\n';
 
@@ -452,6 +454,13 @@ document.getElementById("detach").addEventListener("click", async (e) => {
   await chrome.debugger.detach(debuggee);
   PANEL.reset();
 });
+
+document.getElementById("notice-close").addEventListener("click", (e) => {
+  e.preventDefault();
+  document.querySelector('header .notice').style.display = 'none';
+});
+
+  
 
 document.getElementById("checker").addEventListener("click", async (e) => {
   e.preventDefault();

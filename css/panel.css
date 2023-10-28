@@ -1,8 +1,11 @@
 * {
   box-sizing: border-box;
 }
+body {
+  margin: 0;
+}
 header {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
   z-index: 1;
@@ -12,10 +15,37 @@ header {
 }
 .header-inner {
   display: flex;
+  align-items: flex-start;
   column-gap: 1rem;
 }
+header .notice {
+  position: fixed;
+  width: 300px;
+  right: 8px;
+  top: 8px;
+}
+header .notice ul{
+  margin: 0;
+  padding-left: 1rem;
+}
+header .notice-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+header .notice-title h3 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 150%;
+}
+#notice-close {
+  background-color: rgb(0,0,0,0);
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+}
 #messages {
-  margin-top: 80px;
+  padding: 8px;
 }
 #messages > div {
   width: fit-content;
