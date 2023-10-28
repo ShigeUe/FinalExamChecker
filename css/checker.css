@@ -12,6 +12,10 @@ main {
     padding: 10px 50px 40px;
 }
 
+nav {
+  font-size: 16px;
+}
+
 footer {
     text-align: center;
     background-color: #ccc;
@@ -94,29 +98,6 @@ button {
     color: blue;
     font-weight: bold;
 }
-.row {
-  display: flex;
-}
-.row.model {
-  opacity: 0.5;
-}
-.head .row {
-  color: white;
-  background-color: #c0c;
-}
-.col {
-  width: 100px;
-  padding: 2px;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.col:first-child {
-  width: 400px;
-}
-.col.em {
-  background-color: #f00;
-}
 #messages > div {
   width: fit-content;
   padding-left: 1rem;
@@ -140,10 +121,34 @@ button {
 #messages > div.title::before {
   content: "■ "
 }
-#messages > .table {
+#messages .table {
   padding: 2px;
   border: 1px solid #282828;
   margin-bottom: 2px;
+}
+.row {
+  display: flex;
+}
+.row.model {
+  opacity: 0.5;
+}
+.head .row {
+  color: white;
+  background-color: #c0c;
+}
+.col {
+  width: 100px;
+  padding: 2px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col:first-child {
+  width: 400px;
+}
+.col.em {
+  background-color: #f00;
+  color: white;
 }
 #messages img {
   outline: 1px solid red;

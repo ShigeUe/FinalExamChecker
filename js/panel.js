@@ -321,15 +321,15 @@ const DEBUG_SCRIPT = async () => {
   PANEL.add('各ボックスにホバーすると、その要素にフォーカスします。');
   for (const datum of MODEL_DATA) {
     // 要素の面積を取得
-    const area = (datum.box[2] - datum.box[0]) * (datum.box[3] - datum.box[1]);
+    // const area = (datum.box[2] - datum.box[0]) * (datum.box[3] - datum.box[1]);
     let found = null;
 
     for (const el of results) {
       const { nodeValue, box, property } = el;
       const overlapArea = calculateOverlapArea(datum.box, box);
-      const overlapRate = overlapArea / area;
-      // 重なり合いが60%以上、かつ相互に文字が含まれている場合
-      if (overlapRate >= 0.6 && (nodeValue.match(datum.nodeValue.trim()) || datum.nodeValue.match(nodeValue.trim()))) {
+      // const overlapRate = overlapArea / area;
+      // 重なり合っているかつ相互に文字が含まれている場合
+      if (overlapArea > 0 && (nodeValue.match(datum.nodeValue.trim()) || datum.nodeValue.match(nodeValue.trim()))) {
         found = el;
         const emphasises = [];
 
@@ -358,10 +358,12 @@ const DEBUG_SCRIPT = async () => {
           emphasises.push(7);
           element_messages += 'Webフォントではありません<br>';
         }
+        /*
         if (overlapRate < 0.9) {
           emphasises.push(8);
           element_messages += '文字の位置がカンプと大幅に異なります<br>';
         }
+        */
         if ( emphasises.length > 0 ) {
           // 要素のキャプチャを取得
           const captureParam = {
@@ -382,15 +384,15 @@ const DEBUG_SCRIPT = async () => {
 
           PANEL.table(
             [
-              `内容 (${el.nodeId})`, "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか", "一致率",
+              `内容 (${el.nodeId})`, "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",
             ],
             [
               datum.nodeValue, rgb2hex(datum.property.color), datum.property.fontSize, datum.property.fontWeight,
-              datum.property.fontStyle, datum.property.fontFamily, "", "",
+              datum.property.fontStyle, datum.property.fontFamily, "",
             ],
             [
               nodeValue, rgb2hex(property.color), property.fontSize, property.fontWeight, property.fontStyle,
-              getFirstFontName(property.fontFamily), property.isWebFont ? 'はい' : 'いいえ', Math.floor(overlapRate * 100) / 100,
+              getFirstFontName(property.fontFamily), property.isWebFont ? 'はい' : 'いいえ',
             ],
             emphasises
           );
@@ -402,16 +404,15 @@ const DEBUG_SCRIPT = async () => {
       result_messages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>大幅にズレているので要素が取得できません。</p></div>\n';
       PANEL.table(
         [
-          "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか", "一致率",
+          "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",
         ],
         [
           datum.nodeValue, datum.property.color, datum.property.fontSize, datum.property.fontWeight,
-          datum.property.fontStyle, datum.property.fontFamily, "", "",
+          datum.property.fontStyle, datum.property.fontFamily, "",
         ],
-        [ '該当なし', '', '', '', '', '', '', '', ],
+        [ '大幅にズレているので要素が取得できません', '', '', '', '', '', '', ],
         []
       );
-      PANEL.add('※大幅にズレているか、要素の構成が違っているので検出できませんでした。');
     }
   }
 
@@ -533,7 +534,9 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     document.getElementById('messages').querySelectorAll('.table').forEach((el) => {
       tables = tables + el.outerHTML;
     });
-    win.document.getElementById('messages').innerHTML = result_messages;
+    tables = '<h2 id="CHECK_LIST">文字要素のチェック一覧</h2>\n<div class="tables">' + tables + '</div>\n';
+    result_messages = '<h2 id="CHECK_DETAILS">文字要素のチェック詳細</h2>\n<div>' + result_messages + "</div>";
+    win.document.getElementById('messages').innerHTML = tables + result_messages;
     // await chrome.debugger.detach(debuggee);
   });
 

@@ -11,6 +11,15 @@
 <body>
   <header><h1>最終課題チェッカー</h1></header>
 
+  <nav>
+    <ul>
+      <li><a href="#SOURCE_CODE_CHECK">ソースコードチェック結果</a></li>
+      <li><a href="#CHECK_LIST">文字要素のチェック一覧</a></li>
+      <li><a href="#CHECK_DETAILS">文字要素のチェック詳細</a></li>
+    </ul>
+  </nav>
+
+
   <main>
     <h2>ソースコードチェック</h2>
     <h3>HTML</h3>
@@ -40,10 +49,9 @@
       <button type="button" class="perform">課題チェック再実行</button>
     </p>
 
-    <h2>ソースコードチェック結果</h2>
+    <h2 id="SOURCE_CODE_CHECK">ソースコードチェック結果</h2>
     <pre id="result" class="mt1"></pre>
 
-    <h2>文字要素のチェック</h2>
     <div id="messages" class="mt1"></div>
   </main>
   <script src="js/checker.js"></script>
