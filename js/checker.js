@@ -230,13 +230,27 @@
 
       comment('■見出しタグ', 'h1から始まり、順序を飛ばさずh2→h3の順で使用します。');
       results = doc.querySelectorAll('h1,h2,h3,h4,h5,h6');
+      if (results[0].tagName != 'H1') {
+        write('<span class="blue">最初がh1ではありません。</span>', true);
+      }
+      let h1count = 0;
+      let savedLevel = 0;
       results.forEach((ele) => {
+        const level = ele.tagName.slice(-1) - 0;
+        if (level === 1) h1count++;
+
         const re = ele.outerHTML
           .replaceAll('<', '&lt;').replaceAll('>', '&gt;')
           .replace(/&lt;h[1-6].*?&gt;/i, '<span class="red">$&</span>')
           .replace(/&lt;\/h[1-6]&gt;/i, '<span class="red">$&</span>');
-        write(re, true);
+        const added = (savedLevel < level && ((level - savedLevel) !== 1)) ? '　<span class="blue">（飛んでいます）</span>' : '';
+        write(re + added, true);
+
+        savedLevel = level;
       });
+      if (h1count > 1) {
+        write('<span class="blue">h1が1つではありません。</span>', true);
+      }
       comment('■改行チェック', '文中の強制改行はNGです。');
       results = doc.querySelectorAll('br');
       results.forEach((ele) => {
