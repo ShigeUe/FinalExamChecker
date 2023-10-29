@@ -291,4 +291,26 @@
       result.style.display = 'block';
     });
   });
+
+  document.getElementById('CHECK_LIST_DOWNLOAD').addEventListener('click', (e) => {
+    e.preventDefault();
+
+    html2canvas(document.querySelector('#messages .tables')).then((canvas) => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "CHECK_LIST_" + (new Date).toLocaleString().replaceAll(/[\/: ]/g,'_') + ".png";
+      link.click();
+    });
+
+  });
+  document.getElementById('CHECK_DETAILS_DOWNLOAD').addEventListener('click', (e) => {
+    e.preventDefault();
+
+    html2canvas(document.querySelector('#messages .details')).then((canvas) => {
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "CHECK_DETAILS_" + (new Date).toLocaleString().replaceAll(/[\/: ]/g,'_') + ".png";
+      link.click();
+    });    
+  });
 })();

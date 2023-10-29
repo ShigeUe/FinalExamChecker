@@ -118,6 +118,10 @@ button {
   font-weight: bold;
   color: #00ffff;
 }
+#messages .tables,
+#messages .details {
+  padding: 1rem;
+}
 #messages > div.title::before {
   content: "■ "
 }

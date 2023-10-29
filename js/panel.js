@@ -65,7 +65,7 @@ const PANEL = {
       const col = this.querySelector('.head .row .col:first-child');
       const nodeId = col.innerText.match(/\d+/)?.at(0) - 0;
       if (nodeId) {
-        await chrome.debugger.sendCommand(debuggee,"DOM.scrollIntoViewIfNeeded",{ nodeId });
+        await chrome.debugger.sendCommand(debuggee, "DOM.scrollIntoViewIfNeeded",{ nodeId });
         await chrome.debugger.sendCommand(debuggee, "Overlay.highlightNode", { highlightConfig: HIGHLIGHTCONFIG, nodeId });
       }
     });  
@@ -153,6 +153,21 @@ const calculateOverlapArea = (rect1, rect2) => {
     return 0; // 重なっている領域が存在しない場合
   }
 };
+
+const getOutsideBox = (quads) => {
+  if (quads.length == 1) {
+    return [quads[0][0], quads[0][1], quads[0][4], quads[0][5]];
+  }
+  let left = Number.MAX_SAFE_INTEGER, top = Number.MAX_SAFE_INTEGER, right = 0, bottom = 0;
+  for (q of quads) {
+    left = (q[0] < left) ? q[0] : left;
+    top = (q[1] < top) ? q[1] : top;
+    right = (q[4] > right) ? q[4] : right;
+    bottom = (q[5] > bottom) ? q[5] : bottom;
+  }
+  return [left, top, right, bottom];
+};
+
 
 const startDebugger = async () => {
   debuggee = { tabId: chrome.devtools.inspectedWindow.tabId };
@@ -243,7 +258,7 @@ const DEBUG_SCRIPT = async () => {
       }
 
       // 左上、右下のboxを定義
-      const box = [quads[0][0], quads[0][1], quads[0][4], quads[0][5]];
+      const box = getOutsideBox(quads);
       // 適用されているFontを取得
       const { fonts } = await chrome.debugger.sendCommand(
         debuggee,
@@ -320,16 +335,17 @@ const DEBUG_SCRIPT = async () => {
   PANEL.add('どこかに差異があるテキスト要素を一覧します。');
   PANEL.add('各ボックスにホバーすると、その要素にフォーカスします。');
   for (const datum of MODEL_DATA) {
-    // 要素の面積を取得
-    // const area = (datum.box[2] - datum.box[0]) * (datum.box[3] - datum.box[1]);
     let found = null;
 
     for (const el of results) {
       const { nodeValue, box, property } = el;
       const overlapArea = calculateOverlapArea(datum.box, box);
-      // const overlapRate = overlapArea / area;
       // 重なり合っているかつ相互に文字が含まれている場合
       if (overlapArea > 0 && (nodeValue.match(datum.nodeValue.trim()) || datum.nodeValue.match(nodeValue.trim()))) {
+        // 対象文字が1文字の場合は、完全一致以外は次へ
+        if (nodeValue.trim().length == 1 && datum.nodeValue.trim() != nodeValue.trim()) {
+          continue;
+        }
         found = el;
         const emphasises = [];
 
@@ -358,12 +374,6 @@ const DEBUG_SCRIPT = async () => {
           emphasises.push(7);
           element_messages += 'Webフォントではありません<br>';
         }
-        /*
-        if (overlapRate < 0.9) {
-          emphasises.push(8);
-          element_messages += '文字の位置がカンプと大幅に異なります<br>';
-        }
-        */
         if ( emphasises.length > 0 ) {
           // 要素のキャプチャを取得
           const captureParam = {
@@ -401,7 +411,7 @@ const DEBUG_SCRIPT = async () => {
       }
     }
     if (!found) {
-      result_messages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>大幅にズレているので要素が取得できません。</p></div>\n';
+      result_messages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>要素が取得できません。</p></div>\n';
       PANEL.table(
         [
           "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",
@@ -410,7 +420,7 @@ const DEBUG_SCRIPT = async () => {
           datum.nodeValue, datum.property.color, datum.property.fontSize, datum.property.fontWeight,
           datum.property.fontStyle, datum.property.fontFamily, "",
         ],
-        [ '大幅にズレているので要素が取得できません', '', '', '', '', '', '', ],
+        [ '要素が取得できません', '', '', '', '', '', '', ],
         []
       );
     }
@@ -534,9 +544,8 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     document.getElementById('messages').querySelectorAll('.table').forEach((el) => {
       tables = tables + el.outerHTML;
     });
-    tables = '<h2 id="CHECK_LIST">文字要素のチェック一覧</h2>\n<div class="tables">' + tables + '</div>\n';
-    result_messages = '<h2 id="CHECK_DETAILS">文字要素のチェック詳細</h2>\n<div>' + result_messages + "</div>";
-    win.document.getElementById('messages').innerHTML = tables + result_messages;
+    this.document.querySelector('#messages .tables').innerHTML = tables;
+    this.document.querySelector('#messages .details').innerHTML = result_messages;
     // await chrome.debugger.detach(debuggee);
   });
 
