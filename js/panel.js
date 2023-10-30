@@ -366,7 +366,7 @@ const DEBUG_SCRIPT = async () => {
           emphasises.push(5);
           element_messages += '文字のスタイルが違います（' + datum.property.fontStyle + ' → ' + property.fontStyle + '）<br>';
         }
-        if (getFirstFontName(property.fontFamily) != datum.property.fontFamily) {
+        if (getFirstFontName(property.fontFamily)?.toLowerCase() != datum.property.fontFamily.toLowerCase()) {
           emphasises.push(6);
           element_messages += 'フォントファミリーが違います（' + datum.property.fontFamily + ' → ' + getFirstFontName(property.fontFamily) + '）<br>';
         }

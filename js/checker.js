@@ -158,6 +158,50 @@
         write(`<span class="blue">エラーはありません</span>`, true);
       }
 
+      comment('■Googleフォントチェック', 'Noto Sans JPの400,700、Poppinsの通常700,800,斜体700,800が必要です。');
+      const googleFonts = doc.querySelectorAll('link[href^="https://fonts.googleapis.com/"]');
+      let fontFamilyError = false;
+      if (googleFonts.length === 0) {
+        write(`<span class="red">linkタグがありません</span>`, true);
+        fontFamilyError = true;
+      }
+      if (googleFonts.length > 1) {
+        write(`<span class="red">linkタグが複数あります</span>`, true);
+        fontFamilyError = true;
+      }
+      let googleFontNotoSansOK = false;
+      let googleFontPoppinsOK = false;
+      googleFonts.forEach((e) => {
+        const url = new URL(e.href);
+        const families = url.searchParams.getAll('family');
+        for (let f of families) {
+          if (f.match('Noto Sans JP')) {
+            googleFontNotoSansOK = (f == 'Noto Sans JP:wght@400;700');
+          }
+          if (f.match('Poppins')) {
+            googleFontPoppinsOK = (f == 'Poppins:ital,wght@0,700;0,800;1,700;1,800');
+          }
+        }
+      });
+      if (!googleFontNotoSansOK) {
+        write(`<span class="red">Noto Sans JPの読み込みが正しくありません</span>`, true);
+        fontFamilyError = true;
+      }
+      if (!googleFontPoppinsOK) {
+        write(`<span class="red">Poppinsの読み込みが正しくありません</span>`, true);
+        fontFamilyError = true;
+      }
+      if (fontFamilyError) {
+        let linkTag = '';
+        googleFonts.forEach((e) => {
+          linkTag += e.outerHTML + '\n';
+        });
+        write(linkTag);
+      }
+      else {
+        write('<span class="blue">Googleフォント...OK</span>', true);
+      }
+
       comment('■HTMLのコメント');
       results = [...html.matchAll(/.*<!--[\s\S]+?-->/g)];
       results.forEach((ele) => {
@@ -177,7 +221,7 @@
       });
 
       comment('■meta description', '完全一致が求められています。');
-      const content = doc.querySelector('meta[name="description"')?.content;
+      const content = doc.querySelector('meta[name="description"]')?.content;
       if (meta_description === content) {
         write('description...<span class="blue">OK</span>', true);
       }
@@ -230,15 +274,21 @@
 
       comment('■見出しタグ', 'h1から始まり、順序を飛ばさずh2→h3の順で使用します。');
       results = doc.querySelectorAll('h1,h2,h3,h4,h5,h6');
-      if (results[0].tagName != 'H1') {
-        write('<span class="blue">最初がh1ではありません。</span>', true);
+      let h1count = doc.querySelectorAll('h1').length;
+      if (h1count === 0) {
+        write('<span class="blue">h1がありません。</span>', true);
       }
-      let h1count = 0;
+      else {
+        if (h1count > 1) {
+          write('<span class="blue">h1が1つではありません。</span>', true);
+        }  
+        if (results[0].tagName != 'H1') {
+          write('<span class="blue">最初がh1ではありません。</span>', true);
+        }
+      }
       let savedLevel = 0;
       results.forEach((ele) => {
         const level = ele.tagName.slice(-1) - 0;
-        if (level === 1) h1count++;
-
         const re = ele.outerHTML
           .replaceAll('<', '&lt;').replaceAll('>', '&gt;')
           .replace(/&lt;h[1-6].*?&gt;/i, '<span class="red">$&</span>')
@@ -248,9 +298,6 @@
 
         savedLevel = level;
       });
-      if (h1count > 1) {
-        write('<span class="blue">h1が1つではありません。</span>', true);
-      }
       comment('■改行チェック', '文中の強制改行はNGです。');
       results = doc.querySelectorAll('br');
       results.forEach((ele) => {
