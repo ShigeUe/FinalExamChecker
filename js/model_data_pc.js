@@ -105,7 +105,7 @@ const MODEL_DATA_PC = [
     ],
     "property": {
       "color": "rgb(242, 161, 24)",
-      "fontSize": "36px",
+      "fontSize": "38px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -137,7 +137,7 @@ const MODEL_DATA_PC = [
     ],
     "property": {
       "color": "rgb(70, 192, 23)",
-      "fontSize": "36px",
+      "fontSize": "38px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -153,7 +153,7 @@ const MODEL_DATA_PC = [
     ],
     "property": {
       "color": "rgb(242, 102, 24)",
-      "fontSize": "36.8px",
+      "fontSize": "36px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
@@ -169,7 +169,7 @@ const MODEL_DATA_PC = [
     ],
     "property": {
       "color": "rgb(0, 0, 0)",
-      "fontSize": "36.8px",
+      "fontSize": "36px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
