@@ -374,4 +374,44 @@
       link.click();
     });    
   });
+
+  document.querySelector('#messages .tables').addEventListener('dblclick', async (e) => {
+    let element = e.target;
+    while (element && !element.classList.contains('table')) {
+      element = element.parentElement;
+    }
+    if (element) {
+      setTimeout(() => {
+        element.style = 'background-color: rgba(255,0,0,0.5)';
+        setTimeout(() => {
+          if (confirm(`削除します。\nよろしいですか？`)) {
+            element.remove();
+          }
+          else {
+            element.style = '';
+          }    
+        }, 100)
+      }, 0);
+    }
+  });
+
+  document.querySelector('#messages .details').addEventListener('dblclick', (e) => {
+    let element = e.target;
+    while (element && !element.classList.contains('datum')) {
+      element = element.parentElement;
+    }
+    if (element) {
+      setTimeout(() => {
+        element.style = 'background-color: rgba(255,0,0,0.5)';
+        setTimeout(() => {
+          if (confirm(`削除します。\nよろしいですか？`)) {
+            element.remove();
+          }
+          else {
+            element.style = '';
+          }    
+        }, 100)
+      }, 0);
+    }
+  });
 })();
