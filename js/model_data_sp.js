@@ -2178,7 +2178,7 @@ const MODEL_DATA_SP = [
     "property": {
       "color": "rgb(153, 153, 153)",
       "fontSize": "10px",
-      "fontWeight": "700",
+      "fontWeight": "800",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
     }
