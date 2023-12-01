@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FinalExamChecker",
-  "version": "1.5",
+  "version": "1.6",
   "permissions": ["debugger", "tabs"],
   "devtools_page": "devtools.html",
   "action": {}

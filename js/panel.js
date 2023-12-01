@@ -352,23 +352,23 @@ const DEBUG_SCRIPT = async () => {
         let element_messages = '';
         if (property.color != datum.property.color) {
           emphasises.push(2);
-          element_messages += '文字色が違います（' + rgb2hex(datum.property.color) + ' → ' + rgb2hex(property.color) + '）<br>';
+          element_messages += '文字色が違います（コードは' + rgb2hex(property.color) + 'ですがカンプは' + rgb2hex(datum.property.color) + '）<br>';
         }
         if (property.fontSize != datum.property.fontSize) {
           emphasises.push(3);
-          element_messages += '文字の大きさが違います（' + datum.property.fontSize + ' → ' + property.fontSize + '）<br>';
+          element_messages += '文字の大きさが違います（コードは' + property.fontSize + 'ですがカンプは' + datum.property.fontSize + '）<br>';
         }
         if (property.fontWeight != datum.property.fontWeight) {
           emphasises.push(4);
-          element_messages += '文字の太さが違います（' + datum.property.fontWeight + ' → ' + property.fontWeight + '）<br>';
+          element_messages += '文字の太さが違います（コードは' + property.fontWeight + 'ですがカンプは' + datum.property.fontWeight + '）<br>';
         }
         if (property.fontStyle != datum.property.fontStyle) {
           emphasises.push(5);
-          element_messages += '文字のスタイルが違います（' + datum.property.fontStyle + ' → ' + property.fontStyle + '）<br>';
+          element_messages += '文字のスタイルが違います（コードは' + property.fontStyle + 'ですがカンプは' + datum.property.fontStyle + '）<br>';
         }
         if (getFirstFontName(property.fontFamily)?.toLowerCase() != datum.property.fontFamily.toLowerCase()) {
           emphasises.push(6);
-          element_messages += 'フォントファミリーが違います（' + datum.property.fontFamily + ' → ' + getFirstFontName(property.fontFamily) + '）<br>';
+          element_messages += 'フォントが違います（コードは' + getFirstFontName(property.fontFamily) + 'ですがカンプは' + datum.property.fontFamily + '）<br>';
         }
         if (!property.isWebFont) {
           emphasises.push(7);
@@ -445,6 +445,7 @@ const initDebug = async () => {
   await wait(1000);
   // slickの自動再生を止め最初のスライドに戻す
   chrome.devtools.inspectedWindow.eval(`$('.slick-list').parent().slick('slickPause')`);
+  await wait(1000);
   chrome.devtools.inspectedWindow.eval(`$('.slick-list').parent().slick('slickGoTo', 0)`);
   // 一番上にスクロール
   chrome.devtools.inspectedWindow.eval("window.scrollTo(0,0)");
