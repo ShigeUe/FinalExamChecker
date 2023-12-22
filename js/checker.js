@@ -142,7 +142,7 @@
       errorMessage = await html_error_check();
       if (errorMessage) {
         write(`<span class="red">${errorMessage}</span>`, true);
-        write(`<button type="button" class="validator" onclick="document.forms['html-check-form'].submit();return false;">Validatorを開く</button>`, true);
+        // write(`<button type="button" class="validator" onclick="document.forms['html-check-form'].submit();return false;">Validatorを開く</button>`, true);
       }
       else {
         write(`<span class="blue">エラーはありません</span>`, true);
@@ -152,7 +152,7 @@
       errorMessage = await css_error_check();
       if (errorMessage) {
         write(`<span class="red">${errorMessage}</span>`, true);
-        write(`<button type="button" class="validator" onclick="document.forms['css-check-form'].submit();return false;">Validatorを開く</button>`, true);
+        // write(`<button type="button" class="validator" onclick="document.forms['css-check-form'].submit();return false;">Validatorを開く</button>`, true);
       }
       else {
         write(`<span class="blue">エラーはありません</span>`, true);
@@ -290,7 +290,7 @@
       results.forEach((ele) => {
         const level = ele.tagName.slice(-1) - 0;
         const re = ele.outerHTML
-          .replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+          .replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(/\n +/g, '\n')
           .replace(/&lt;h[1-6].*?&gt;/i, '<span class="red">$&</span>')
           .replace(/&lt;\/h[1-6]&gt;/i, '<span class="red">$&</span>');
         const added = (savedLevel < level && ((level - savedLevel) !== 1)) ? '　<span class="blue">（飛んでいます）</span>' : '';
@@ -300,13 +300,18 @@
       });
       comment('■改行チェック', '文中の強制改行はNGです。');
       results = doc.querySelectorAll('br');
+      let parentElements = [];
       results.forEach((ele) => {
-        const re = ele.parentElement.outerHTML
-          .replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-          .replace(/&lt;br.*?&gt;/i, '<span class="red">$&</span>');
-        write(re, true);
+        const pa = ele.parentElement;
+        if (parentElements.indexOf(pa) < 0) {
+          parentElements.push(pa);
+          const re = pa.outerHTML
+            .replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(/\n +/g, '\n')
+            .replace(/&lt;br.*?&gt;/ig, '<span class="red">$&</span>');
+          write(re, true);
+        }
       });
-
+  
       comment('■alt属性チェック', 'スクリーンリーダーで読ませた時に違和感が出ないようにします。文字が画像化されている時は、変更せずにaltに適用します。');
       results = doc.querySelectorAll('img');
       results.forEach((ele) => {
