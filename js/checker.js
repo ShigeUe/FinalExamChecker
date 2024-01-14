@@ -353,6 +353,12 @@
         write(ele[0]);
       });
 
+      comment('■ネガティブマージンチェック', 'ネガティブマージンは極力使わないようにします。');
+      results = [...css.matchAll(/.*\s*margin[^:]*\s*:\s*-[.\d]+.*/g)];
+      results.forEach((ele) => {
+        write(ele[0]);
+      });  
+
       comment('■チェック終了');
       result.style.display = 'block';
     });
