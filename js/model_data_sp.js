@@ -183,7 +183,7 @@ const MODEL_DATA_SP = [
     "property": {
       "color": "rgb(242, 102, 24)",
       "fontSize": "21px",
-      "fontWeight": "700",
+      "fontWeight": "800",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
     }
@@ -200,7 +200,7 @@ const MODEL_DATA_SP = [
     "property": {
       "color": "rgb(0, 0, 0)",
       "fontSize": "21px",
-      "fontWeight": "700",
+      "fontWeight": "800",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
     }
