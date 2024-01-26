@@ -131,7 +131,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(242, 161, 24)",
-      "fontSize": "21.2px",
+      "fontSize": "21px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -165,7 +165,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(70, 192, 23)",
-      "fontSize": "21.2px",
+      "fontSize": "21px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -182,7 +182,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(242, 102, 24)",
-      "fontSize": "20.56px",
+      "fontSize": "21px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
@@ -199,7 +199,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(0, 0, 0)",
-      "fontSize": "20.56px",
+      "fontSize": "21px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
@@ -284,7 +284,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(51, 51, 51)",
-      "fontSize": "12.8px",
+      "fontSize": "13px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -301,7 +301,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(51, 51, 51)",
-      "fontSize": "12.8px",
+      "fontSize": "13px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -355,7 +355,7 @@ const MODEL_DATA_SP = [
       "fontSize": "10px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "\"Noto Sans JP\"",
+      "fontFamily": "Noto Sans JP",
     }
   },
   {
@@ -386,7 +386,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(51, 51, 51)",
-      "fontSize": "12.8px",
+      "fontSize": "13px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -403,7 +403,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(51, 51, 51)",
-      "fontSize": "12.8px",
+      "fontSize": "13px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -457,7 +457,7 @@ const MODEL_DATA_SP = [
       "fontSize": "10px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "\"Noto Sans JP\"",
+      "fontFamily": "Noto Sans JP",
     }
   },
   {
@@ -778,7 +778,7 @@ const MODEL_DATA_SP = [
     "property": {
       "color": "rgb(70, 192, 23)",
       "fontSize": "60px",
-      "fontWeight": "400",
+      "fontWeight": "700",
       "fontStyle": "italic",
       "fontFamily": "Poppins",
     }
@@ -812,7 +812,7 @@ const MODEL_DATA_SP = [
     "property": {
       "color": "rgb(70, 192, 23)",
       "fontSize": "60px",
-      "fontWeight": "400",
+      "fontWeight": "700",
       "fontStyle": "italic",
       "fontFamily": "Poppins",
     }
@@ -846,7 +846,7 @@ const MODEL_DATA_SP = [
     "property": {
       "color": "rgb(70, 192, 23)",
       "fontSize": "60px",
-      "fontWeight": "400",
+      "fontWeight": "700",
       "fontStyle": "italic",
       "fontFamily": "Poppins",
     }
@@ -1239,8 +1239,7 @@ const MODEL_DATA_SP = [
       "fontSize": "14px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "Poppins",
-      "isWebFont": false
+      "fontFamily": "Noto Sans JP"
     }
   },
   {
@@ -1308,8 +1307,7 @@ const MODEL_DATA_SP = [
       "fontSize": "14px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "Poppins",
-      "isWebFont": false
+      "fontFamily": "Noto Sans JP"
     }
   },
   {
@@ -1377,8 +1375,7 @@ const MODEL_DATA_SP = [
       "fontSize": "14px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "Poppins",
-      "isWebFont": false
+      "fontFamily": "Noto Sans JP"
     }
   },
   {
@@ -1548,8 +1545,7 @@ const MODEL_DATA_SP = [
       "fontSize": "14px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "Poppins",
-      "isWebFont": false
+      "fontFamily": "Noto Sans JP"
     }
   },
   {
@@ -1617,8 +1613,7 @@ const MODEL_DATA_SP = [
       "fontSize": "14px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "Poppins",
-      "isWebFont": false
+      "fontFamily": "Noto Sans JP"
     }
   },
   {
@@ -1703,8 +1698,7 @@ const MODEL_DATA_SP = [
       "fontSize": "14px",
       "fontWeight": "400",
       "fontStyle": "normal",
-      "fontFamily": "Poppins",
-      "isWebFont": false
+      "fontFamily": "Noto Sans JP"
     }
   },
   {
