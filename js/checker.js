@@ -359,6 +359,12 @@
         write(ele[0]);
       });  
 
+      comment('■transformプロパティチェック', '過度のtransformプロパティの利用がないかチェックしてください。');
+      results = [...css.matchAll(/.*\stransform\s*:.*/g)];
+      results.forEach((ele) => {
+        write(ele[0]);
+      });
+  
       comment('■チェック終了');
       result.style.display = 'block';
     });
