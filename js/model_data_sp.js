@@ -131,7 +131,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(242, 161, 24)",
-      "fontSize": "21px",
+      "fontSize": "20px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -165,7 +165,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(70, 192, 23)",
-      "fontSize": "21px",
+      "fontSize": "20px",
       "fontWeight": "700",
       "fontStyle": "normal",
       "fontFamily": "Noto Sans JP",
@@ -182,7 +182,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(242, 102, 24)",
-      "fontSize": "21px",
+      "fontSize": "20px",
       "fontWeight": "800",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
@@ -199,7 +199,7 @@ const MODEL_DATA_SP = [
     ],
     "property": {
       "color": "rgb(0, 0, 0)",
-      "fontSize": "21px",
+      "fontSize": "20px",
       "fontWeight": "800",
       "fontStyle": "normal",
       "fontFamily": "Poppins",
