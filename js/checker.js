@@ -365,6 +365,14 @@
         write(ele[0]);
       });
   
+      comment('■slickチェック', 'autoplayにtrueが設定されているか？');
+      if (document.getElementById('slick').value == 1) {
+        write('<span class="blue">OK</span>', true);
+      }
+      else {
+        write('<span class="red">NG</span>', true);
+      }
+  
       comment('■チェック終了');
       result.style.display = 'block';
     });

@@ -331,6 +331,28 @@ const DEBUG_SCRIPT = async () => {
   }
 
   PANEL.emptyLine();
+  PANEL.add("slickのオプションチェック", "title");
+
+  let slick = false;
+  await (async () => {
+    return new Promise((resolve) => {
+      chrome.devtools.inspectedWindow.eval(
+        `$('.slick-list').parent().slick('slickGetOption', 'autoplay')`,
+        (result) => {
+          if (result) {
+            PANEL.add('autoplayにtrueが設定されています。');
+            slick = true;
+          }
+          else {
+            PANEL.add('autoplayにtrueが設定されていません。', 'error');
+          }
+          resolve();
+        }
+      );  
+    });
+  })();
+
+  PANEL.emptyLine();
   PANEL.add("テキスト要素比較", "title");
   PANEL.add('どこかに差異があるテキスト要素を一覧します。');
   PANEL.add('各ボックスにホバーすると、その要素にフォーカスします。');
@@ -426,7 +448,7 @@ const DEBUG_SCRIPT = async () => {
     }
   }
 
-  return true;
+  return slick;
   // await chrome.debugger.detach(debuggee);
 };
 
@@ -481,9 +503,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
   PANEL.reset();
 
   await initDebug();
-  if (!(await DEBUG_SCRIPT())) {
-    return;
-  }
+  const slick = await DEBUG_SCRIPT();
   await finishDebug();
 
   const { frameTree } = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceTree');
@@ -538,6 +558,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     this.document.querySelector('#html').value = html;
     this.document.querySelector('#css').value = css;
     this.document.querySelector('#js').value = js;
+    this.document.querySelector('#slick').value = slick ? 1 : 0;
     this.document.querySelector('.perform').click();
     // this.document.querySelector('#FINAL-EXAM-CHECKER').submit();
 
