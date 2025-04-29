@@ -1,5 +1,6 @@
 let ROOT_BODY;
 let debuggee;
+let attached = false;
 
 let results;
 let result_messages;
@@ -7,6 +8,10 @@ let color_messages;
 
 let MODEL_DATA;
 let METRICS;
+
+chrome.debugger.onDetach.addListener(() => {
+  attached = false;
+});
 
 const PANEL = {
   element: document.getElementById("messages"),
@@ -66,13 +71,15 @@ const PANEL = {
     table.addEventListener("mouseenter", async function (e) {
       const col = this.querySelector('.head .row .col:first-child');
       const nodeId = col.innerText.match(/\d+/)?.at(0) - 0;
-      if (nodeId) {
-        await chrome.debugger.sendCommand(debuggee, "DOM.scrollIntoViewIfNeeded",{ nodeId });
+      if (attached && nodeId) {
+        await chrome.debugger.sendCommand(debuggee, "DOM.scrollIntoViewIfNeeded", { nodeId });
         await chrome.debugger.sendCommand(debuggee, "Overlay.highlightNode", { highlightConfig: HIGHLIGHTCONFIG, nodeId });
       }
     });  
     table.addEventListener("mouseleave", async function (e) {
-      await chrome.debugger.sendCommand(debuggee, "Overlay.hideHighlight");
+      if (attached) {
+        await chrome.debugger.sendCommand(debuggee, "Overlay.hideHighlight");
+      }
     });
 
     this.element.append(table);
@@ -504,14 +511,14 @@ const colorCheck = async () => {
     { title:"料金プラン表の見出し",  x: 435,y:5810,color:"f5f5f5" },
     { title:"料金プラン下の水色",    x: 450,y:6400,color:"f2f8fe" },
     { title:"よくあるご質問のA部分", x: 360,y:6890,color:"ffeee5" },
-    { title:"よくあるご質問下の水色",x: 450,y:7850,color:"f2f8fe" },
+    { title:"よくあるご質問下の水色",x: 150,y:7850,color:"f2f8fe" },
     { title:"フッターの帯",          x: 150,y:8050,color:"222222" },
   ];
 
   const canvas = document.createElement("canvas");
   canvas.width = METRICS.contentSize.width;
   canvas.height = METRICS.contentSize.height;
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
 
   const img = await getImageFromScreen();
   context.drawImage(img, 0, 0);
@@ -546,6 +553,9 @@ const initDebug = async () => {
     "info",
   );
 
+  // コース案内をカンプの状態にする
+  chrome.devtools.inspectedWindow.eval(`$('main a:contains(6歳まで)').click();`);
+  await wait(500);
   // アコーディオンを開く
   chrome.devtools.inspectedWindow.eval(`$('main :contains(よくあるご質問)').eq(0).find('*:not(:visible)').show();`);
   await wait(500);
@@ -587,7 +597,7 @@ document.getElementById("notice-close").addEventListener("click", (e) => {
 document.getElementById("checker").addEventListener("click", async (e) => {
   e.preventDefault();
 
-  PANEL.reset();
+  document.getElementById("messages").innerHTML = '';
 
   // デバッガを開始
   if (!(await startDebugger())) {
