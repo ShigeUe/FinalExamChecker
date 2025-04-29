@@ -213,10 +213,6 @@ const startDebugger = async () => {
 };
 
 const DEBUG_SCRIPT = async () => {
-  // デバッガを開始
-  if (!(await startDebugger())) {
-    return false;
-  }
   results = [];
   result_messages = '';
 
@@ -565,7 +561,7 @@ const initDebug = async () => {
   await wait(500);
 };
 
-const finishDebug = async () => {
+const finishDebug = () => {
   PANEL.emptyLine();
   const eDate = new Date();
   PANEL.add(
@@ -593,6 +589,13 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   PANEL.reset();
 
+  // デバッガを開始
+  if (!(await startDebugger())) {
+    // 条件に適合しなければ終了
+    await chrome.debugger.detach(debuggee);
+    return false;
+  }
+
   await initDebug();
   const slick = await DEBUG_SCRIPT();
   if (METRICS.contentSize.width == 1536) {
@@ -604,7 +607,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     PANEL.add('チェックはPC版だけです');
     color_messages = '<li>チェックはPC版だけです</li>';
   }
-  await finishDebug();
+  finishDebug();
 
   const { frameTree } = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceTree');
   const frameId = frameTree.frame.id;
