@@ -459,6 +459,9 @@ const num2hex = (num) => {
 };
 
 const getImageFromScreen = async () => {
+  // アコーディオンが開いた後のメトリクスを取得する
+  METRICS = await chrome.debugger.sendCommand(debuggee, "Page.getLayoutMetrics");
+
   // 画面を最大化する
   await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride",
     {
@@ -515,12 +518,14 @@ const colorCheck = async () => {
     { title:"フッターの帯",          x: 150,y:8050,color:"222222" },
   ];
 
+  const img = await getImageFromScreen();
+
   const canvas = document.createElement("canvas");
   canvas.width = METRICS.contentSize.width;
   canvas.height = METRICS.contentSize.height;
+  console.log("カンバスの大きさ", canvas.width, canvas.height);
   const context = canvas.getContext("2d", { willReadFrequently: true });
 
-  const img = await getImageFromScreen();
   context.drawImage(img, 0, 0);
 
   
