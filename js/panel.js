@@ -3,8 +3,10 @@ let debuggee;
 
 let results;
 let result_messages;
+let color_messages;
 
 let MODEL_DATA;
+let METRICS;
 
 const PANEL = {
   element: document.getElementById("messages"),
@@ -194,23 +196,19 @@ const startDebugger = async () => {
   );
   ROOT_BODY = root.children[1].children[1];
 
-  // bodyのサイズが1536pxのときだけチェックする
-  const body_quads = await chrome.debugger.sendCommand(
-    debuggee,
-    "DOM.getContentQuads",
-    { nodeId: ROOT_BODY.nodeId },
-  );
-  if (!body_quads || body_quads.quads[0][2] != 1536 && body_quads.quads[0][2] != 390) {
-    PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。（検出サイズ：" + body_quads.quads[0][2] +"）", "error");
+  // metricsを取得する
+  METRICS = await chrome.debugger.sendCommand(debuggee, "Page.getLayoutMetrics");
+
+  if (METRICS.contentSize.width != 1536 && METRICS.contentSize.width != 390) {
+    PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。（検出サイズ：" + METRICS.contentSize.width +"）", "error");
     return false;
   }
-  if (body_quads.quads[0][2] == 1536) {
+  if (METRICS.contentSize.width == 1536) {
     MODEL_DATA = MODEL_DATA_PC;
   }
-  if (body_quads.quads[0][2] == 390) {
+  if (METRICS.contentSize.width == 390) {
     MODEL_DATA = MODEL_DATA_SP;
   }
-
   return true;
 };
 
@@ -452,6 +450,99 @@ const DEBUG_SCRIPT = async () => {
   // await chrome.debugger.detach(debuggee);
 };
 
+const num2hex = (num) => {
+  const hex = num.toString(16);
+  return (hex.length == 1) ? "0" + hex : hex;
+};
+
+const getImageFromScreen = async () => {
+  // 画面を最大化する
+  await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride",
+    {
+      width: METRICS.contentSize.width,
+      height: METRICS.contentSize.height,
+      deviceScaleFactor: 1,
+      mobile: true,
+      screenHeight: METRICS.contentSize.height
+    });
+
+  // キャプチャ
+  const capture = await chrome.debugger.sendCommand(debuggee, "Page.captureScreenshot");
+
+  // 画面を戻す
+  await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride",
+    {
+      width: METRICS.cssLayoutViewport.clientWidth,
+      height: METRICS.cssLayoutViewport.clientHeight,
+      deviceScaleFactor: 1,
+      mobile: true,
+      screenHeight: METRICS.cssLayoutViewport.clientHeight
+    });
+
+  const img = document.createElement("img");
+  img.src = "data:image/png;base64," + capture.data;
+  
+  return new Promise((resolve) => {
+    img.onload = () => {
+      resolve(img);
+    };
+  });
+}
+
+
+const colorCheck = async () => {
+  const colorTable = [
+    { title:"ヘッダー",              x: 430,y:  50,color:"0079f2" },
+    { title:"ボタン背景色",          x: 660,y: 965,color:"f11f8d" },
+    { title:"キャンペーン",          x: 160,y:1200,color:"f2f8fe" },
+    { title:"コース案内ボタン選択色",x: 300,y:1630,color:"f2a118" },
+    { title:"コース案内ボタン",      x: 650,y:1630,color:"f0f0f0" },
+    { title:"コース案内ボタン",      x:1000,y:1630,color:"f0f0f0" },
+    { title:"コース案内枠",          x: 300,y:1685,color:"ffedcc" },
+    { title:"コース下の水色",        x: 160,y:2200,color:"f2f8fe" },
+    { title:"3つの特色下の水色",     x: 160,y:4000,color:"f2f8fe" },
+    { title:"講師紹介ケント",        x: 450,y:4440,color:"ffeee5" },
+    { title:"講師紹介ナンシー",      x: 850,y:4440,color:"fff6e5" },
+    { title:"講師紹介下の水色",      x: 160,y:5000,color:"f2f8fe" },
+    { title:"料金プラン表の見出し",  x: 435,y:5360,color:"f5f5f5" },
+    { title:"料金プラン表の見出し",  x: 435,y:5810,color:"f5f5f5" },
+    { title:"料金プラン下の水色",    x: 450,y:6400,color:"f2f8fe" },
+    { title:"よくあるご質問のA部分", x: 360,y:6890,color:"ffeee5" },
+    { title:"よくあるご質問下の水色",x: 450,y:7850,color:"f2f8fe" },
+    { title:"フッターの帯",          x: 150,y:8050,color:"222222" },
+  ];
+
+  const canvas = document.createElement("canvas");
+  canvas.width = METRICS.contentSize.width;
+  canvas.height = METRICS.contentSize.height;
+  const context = canvas.getContext("2d");
+
+  const img = await getImageFromScreen();
+  context.drawImage(img, 0, 0);
+
+  
+  color_messages = '';
+
+  PANEL.emptyLine();
+  PANEL.add("背景色のチェック", "title");
+
+  let error = false;
+  for (let item of colorTable) {
+    const c = context.getImageData(item.x, item.y, 1, 1);
+    const hex = num2hex(c.data[0]) + num2hex(c.data[1]) + num2hex(c.data[2]);
+    if (hex != item.color) {
+      PANEL.add(item.title + `の色が違います（${item.color}が${hex}）`, "error");
+      color_messages += '<li class="red">' + item.title + `の色が違います（${item.color}が${hex}）</li>`;
+      error = true;
+    }
+  }
+  if (!error) {
+    PANEL.add('背景色の差異は確認できませんでした。');
+    color_messages = '<li>背景色の差異は確認できませんでした。</li>'
+  }
+};
+
+
 const initDebug = async () => {
   const sDate = new Date();
   PANEL.add(
@@ -504,6 +595,15 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   await initDebug();
   const slick = await DEBUG_SCRIPT();
+  if (METRICS.contentSize.width == 1536) {
+    await colorCheck();
+  }
+  else {
+    PANEL.emptyLine();
+    PANEL.add("背景色のチェック", "title");
+    PANEL.add('チェックはPC版だけです');
+    color_messages = '<li>チェックはPC版だけです</li>';
+  }
   await finishDebug();
 
   const { frameTree } = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceTree');
@@ -568,6 +668,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     });
     this.document.querySelector('#messages .tables').innerHTML = tables;
     this.document.querySelector('#messages .details').innerHTML = result_messages;
+    this.document.querySelector('#messages .color_check').innerHTML = color_messages;
     // await chrome.debugger.detach(debuggee);
   });
 
