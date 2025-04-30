@@ -13,6 +13,19 @@ chrome.debugger.onDetach.addListener(() => {
   attached = false;
 });
 
+async function dbggr(command, option) {
+  if (!attached) {
+    return;
+  }
+  if (typeof option === 'undefined') {
+    return await chrome.debugger.sendCommand(debuggee, command);
+  }
+  else {
+    return await chrome.debugger.sendCommand(debuggee, command, option);
+  }
+}
+
+
 const PANEL = {
   element: document.getElementById("messages"),
   add: function (str, type) {
@@ -71,15 +84,13 @@ const PANEL = {
     table.addEventListener("mouseenter", async function (e) {
       const col = this.querySelector('.head .row .col:first-child');
       const nodeId = col.innerText.match(/\d+/)?.at(0) - 0;
-      if (attached && nodeId) {
-        await chrome.debugger.sendCommand(debuggee, "DOM.scrollIntoViewIfNeeded", { nodeId });
-        await chrome.debugger.sendCommand(debuggee, "Overlay.highlightNode", { highlightConfig: HIGHLIGHTCONFIG, nodeId });
+      if (nodeId) {
+        await dbggr("DOM.scrollIntoViewIfNeeded", { nodeId });
+        await dbggr("Overlay.highlightNode", { highlightConfig: HIGHLIGHTCONFIG, nodeId });
       }
     });  
     table.addEventListener("mouseleave", async function (e) {
-      if (attached) {
-        await chrome.debugger.sendCommand(debuggee, "Overlay.hideHighlight");
-      }
+      await dbggr("Overlay.hideHighlight");
     });
 
     this.element.append(table);
@@ -183,6 +194,7 @@ const startDebugger = async () => {
 
   try {
     await chrome.debugger.attach(debuggee, "1.3");
+
   } catch (e) {
     PANEL.add(
       "Debuggerを開始できません。\n一度リロードし、デベロッパーツールを再表示してください。",
@@ -190,21 +202,18 @@ const startDebugger = async () => {
     );
     return false;
   }
+  attached = true;
 
-  await chrome.debugger.sendCommand(debuggee, "DOM.enable");
-  await chrome.debugger.sendCommand(debuggee, "CSS.enable");
-  await chrome.debugger.sendCommand(debuggee, "Page.enable");
-  await chrome.debugger.sendCommand(debuggee, "Overlay.enable");
+  await dbggr("DOM.enable");
+  await dbggr("CSS.enable");
+  await dbggr("Page.enable");
+  await dbggr("Overlay.enable");
 
-  const { root } = await chrome.debugger.sendCommand(
-    debuggee,
-    "DOM.getDocument",
-    { depth: -1 },
-  );
+  const { root } = await dbggr("DOM.getDocument",{ depth: -1 });
   ROOT_BODY = root.children[1].children[1];
 
   // metricsを取得する
-  METRICS = await chrome.debugger.sendCommand(debuggee, "Page.getLayoutMetrics");
+  METRICS = await dbggr("Page.getLayoutMetrics");
 
   if (METRICS.contentSize.width != 1536 && METRICS.contentSize.width != 390) {
     PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。（検出サイズ：" + METRICS.contentSize.width +"）", "error");
@@ -248,11 +257,7 @@ const DEBUG_SCRIPT = async () => {
         }
       }
 
-      const { quads } = await chrome.debugger.sendCommand(
-        debuggee,
-        "DOM.getContentQuads",
-        { nodeId: node.nodeId },
-      );
+      const { quads } = await dbggr("DOM.getContentQuads", { nodeId: node.nodeId });
       // 見えていない（quadsが無い）要素は飛ばす
       if (!quads.length) {
         return;
@@ -261,17 +266,9 @@ const DEBUG_SCRIPT = async () => {
       // 左上、右下のboxを定義
       const box = getOutsideBox(quads);
       // 適用されているFontを取得
-      const { fonts } = await chrome.debugger.sendCommand(
-        debuggee,
-        "CSS.getPlatformFontsForNode",
-        { nodeId: node.nodeId },
-      );
+      const { fonts } = await dbggr("CSS.getPlatformFontsForNode", { nodeId: node.nodeId });
       // 計算済スタイルを取得
-      const { computedStyle } = await chrome.debugger.sendCommand(
-        debuggee,
-        "CSS.getComputedStyleForNode",
-        { nodeId: node.parentId ?? node.nodeId },
-      );
+      const { computedStyle } = await dbggr("CSS.getComputedStyleForNode", { nodeId: node.parentId ?? node.nodeId });
       // 疑似要素の場合、contentをnodeValueにする
       if (node.pseudoType) {
         node.nodeValue = findProperty(computedStyle, "content").value;
@@ -289,7 +286,7 @@ const DEBUG_SCRIPT = async () => {
           if (font.isCustomFont) {
             allFonts[font.familyName + " - Webフォント"] = font.isCustomFont;
           } else {
-            // await chrome.debugger.sendCommand(debuggee, 'DOM.setAttributeValue', {
+            // await dbggr('DOM.setAttributeValue', {
             //   nodeId: node.parentId,
             //   name: 'style',
             //   value: 'background-color: rgba(255,0,0,0.5)'
@@ -407,7 +404,7 @@ const DEBUG_SCRIPT = async () => {
               "scale": 1
             }
           }
-          const capture = await chrome.debugger.sendCommand(debuggee, 'Page.captureScreenshot', captureParam);
+          const capture = await dbggr('Page.captureScreenshot', captureParam);
           if (capture) {
             element_messages = '<img src="data:image/png;base64,' + capture.data + '"><br>' + element_messages;
             // デバッグ用Box情報
@@ -460,10 +457,10 @@ const num2hex = (num) => {
 
 const getImageFromScreen = async () => {
   // アコーディオンが開いた後のメトリクスを取得する
-  METRICS = await chrome.debugger.sendCommand(debuggee, "Page.getLayoutMetrics");
+  METRICS = await dbggr("Page.getLayoutMetrics");
 
   // 画面を最大化する
-  await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride",
+  await dbggr("Emulation.setDeviceMetricsOverride",
     {
       width: METRICS.contentSize.width,
       height: METRICS.contentSize.height,
@@ -473,10 +470,10 @@ const getImageFromScreen = async () => {
     });
 
   // キャプチャ
-  const capture = await chrome.debugger.sendCommand(debuggee, "Page.captureScreenshot");
+  const capture = await dbggr("Page.captureScreenshot");
 
   // 画面を戻す
-  await chrome.debugger.sendCommand(debuggee, "Emulation.setDeviceMetricsOverride",
+  await dbggr("Emulation.setDeviceMetricsOverride",
     {
       width: METRICS.cssLayoutViewport.clientWidth,
       height: METRICS.cssLayoutViewport.clientHeight,
@@ -624,13 +621,13 @@ document.getElementById("checker").addEventListener("click", async (e) => {
   }
   finishDebug();
 
-  const { frameTree } = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceTree');
+  const { frameTree } = await dbggr('Page.getResourceTree');
   const frameId = frameTree.frame.id;
   let content;
 
   // HTMLの取得
   try {
-    content = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceContent', { frameId, url: frameTree.frame.url });
+    content = await dbggr('Page.getResourceContent', { frameId, url: frameTree.frame.url });
   }
   catch (e) {
     PANEL.add('htmlが取得できませんでした。', 'error');
@@ -646,7 +643,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     return;
   }
   try {
-    content = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceContent', { frameId, url: cssFile.url });
+    content = await dbggr('Page.getResourceContent', { frameId, url: cssFile.url });
   }
   catch (e) {
     PANEL.add('style.cssが取得できませんでした。', 'error');
@@ -661,7 +658,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     return;
   }
   try {
-    content = await chrome.debugger.sendCommand(debuggee, 'Page.getResourceContent', { frameId, url: jsFile.url });
+    content = await dbggr('Page.getResourceContent', { frameId, url: jsFile.url });
   }
   catch (e) {
     PANEL.add('main.jsが取得できませんでした。', 'error');
