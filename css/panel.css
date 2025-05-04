@@ -64,8 +64,12 @@ header .notice-title h3 {
 #messages > div.title {
   padding: 0;
   margin-left: 1rem;
+  font-size: 133.33333%;
   font-weight: bold;
   color: #00ffff;
+}
+#messages > div.emphasis {
+  font-weight: bold;
 }
 #messages > div.title::before {
   content: "■ "

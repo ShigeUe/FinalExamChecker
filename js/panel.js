@@ -1,10 +1,11 @@
+let ROOT;
 let ROOT_BODY;
 let debuggee;
 let attached = false;
 
 let results;
-let result_messages;
-let color_messages;
+let resultMessages;
+let checkElementsPropertiesMessage;
 
 let MODEL_DATA;
 let METRICS;
@@ -36,7 +37,7 @@ const PANEL = {
       div.innerHTML = "&nbsp;";
     }
 
-    if (type == "error" || type == "info" || type == "title") {
+    if (type == "error" || type == "info" || type == "title" || type == "emphasis") {
       div.classList.add(type);
     }
     this.element.append(div);
@@ -88,7 +89,7 @@ const PANEL = {
         await dbggr("DOM.scrollIntoViewIfNeeded", { nodeId });
         await dbggr("Overlay.highlightNode", { highlightConfig: HIGHLIGHTCONFIG, nodeId });
       }
-    });  
+    });
     table.addEventListener("mouseleave", async function (e) {
       await dbggr("Overlay.hideHighlight");
     });
@@ -103,13 +104,13 @@ const PANEL = {
   },
 };
 
-const findProperty = (properties, needle) => {
+function findProperty(properties, needle) {
   return properties.find((el) => {
     return (el.name == needle);
   });
-};
+}
 
-const findNodeById = (id, node) => {
+function findNodeById(id, node) {
   if (!node) {
     node = ROOT_BODY;
   }
@@ -126,28 +127,31 @@ const findNodeById = (id, node) => {
     }
   }
   return null;
-};
+}
 
-const getFirstFontName = (fontFamily) => {
+function getFirstFontName(fontFamily) {
   return fontFamily.replaceAll('"', "").split(",").at(0).trim();
-};
+}
 
-const wait = (t) => {
+function wait(t) {
   return new Promise((f) => {
     setTimeout(f, t);
   }, () => {});
-};
+}
 
-const rgb2hex = (rgb) => {
+function rgb2hex(rgb) {
   const s = rgb.match(/\d+/g);
   if (s.length !== 3) {
     return '#000000';
   }
-  return '#' + s.map((e) => ("0" + (e - 0).toString(16)).substr(-2, 2)).join('');
-};
+  return '#' + s.map((e) => ("0" + Number(e).toString(16)).slice(-2)).join('');
+}
 
+function num2hex(num) {
+  return ("0" + num.toString(16)).slice(-2);
+}
 
-const calculateOverlapArea = (rect1, rect2) => {
+function calculateOverlapArea(rect1, rect2) {
   // 1つ目の矩形の座標を取得
   const [x1_1, y1_1, x2_1, y2_1] = rect1;
 
@@ -172,9 +176,9 @@ const calculateOverlapArea = (rect1, rect2) => {
   } else {
     return 0; // 重なっている領域が存在しない場合
   }
-};
+}
 
-const getOutsideBox = (quads) => {
+function getOutsideBox(quads) {
   if (quads.length == 1) {
     return [quads[0][0], quads[0][1], quads[0][4], quads[0][5]];
   }
@@ -186,10 +190,13 @@ const getOutsideBox = (quads) => {
     bottom = (q[5] > bottom) ? q[5] : bottom;
   }
   return [left, top, right, bottom];
-};
+}
 
 
-const startDebugger = async () => {
+
+
+
+async function startDebugger() {
   debuggee = { tabId: chrome.devtools.inspectedWindow.tabId };
 
   try {
@@ -209,7 +216,8 @@ const startDebugger = async () => {
   await dbggr("Page.enable");
   await dbggr("Overlay.enable");
 
-  const { root } = await dbggr("DOM.getDocument",{ depth: -1 });
+  const { root } = await dbggr("DOM.getDocument", { depth: -1 });
+  ROOT = root;
   ROOT_BODY = root.children[1].children[1];
 
   // metricsを取得する
@@ -226,11 +234,11 @@ const startDebugger = async () => {
     MODEL_DATA = MODEL_DATA_SP;
   }
   return true;
-};
+}
 
-const DEBUG_SCRIPT = async () => {
+async function DEBUG_SCRIPT() {
   results = [];
-  result_messages = '';
+  resultMessages = '';
 
   const allFonts = {};
   const findNodesThatContainText = async (nodeOrg) => {
@@ -369,30 +377,30 @@ const DEBUG_SCRIPT = async () => {
         found = el;
         const emphasises = [];
 
-        let element_messages = '';
+        let elementMessages = '';
         if (property.color != datum.property.color) {
           emphasises.push(2);
-          element_messages += '文字色が違います（コードは' + rgb2hex(property.color) + 'ですがカンプは' + rgb2hex(datum.property.color) + '）<br>';
+          elementMessages += '文字色が違います（コードは' + rgb2hex(property.color) + 'ですがカンプは' + rgb2hex(datum.property.color) + '）<br>';
         }
         if (property.fontSize != datum.property.fontSize) {
           emphasises.push(3);
-          element_messages += '文字の大きさが違います（コードは' + property.fontSize + 'ですがカンプは' + datum.property.fontSize + '）<br>';
+          elementMessages += '文字の大きさが違います（コードは' + property.fontSize + 'ですがカンプは' + datum.property.fontSize + '）<br>';
         }
         if (property.fontWeight != datum.property.fontWeight) {
           emphasises.push(4);
-          element_messages += '文字の太さが違います（コードは' + property.fontWeight + 'ですがカンプは' + datum.property.fontWeight + '）<br>';
+          elementMessages += '文字の太さが違います（コードは' + property.fontWeight + 'ですがカンプは' + datum.property.fontWeight + '）<br>';
         }
         if (property.fontStyle != datum.property.fontStyle) {
           emphasises.push(5);
-          element_messages += '文字のスタイルが違います（コードは' + property.fontStyle + 'ですがカンプは' + datum.property.fontStyle + '）<br>';
+          elementMessages += '文字のスタイルが違います（コードは' + property.fontStyle + 'ですがカンプは' + datum.property.fontStyle + '）<br>';
         }
         if (getFirstFontName(property.fontFamily)?.toLowerCase() != datum.property.fontFamily.toLowerCase()) {
           emphasises.push(6);
-          element_messages += 'フォントが違います（コードは' + getFirstFontName(property.fontFamily) + 'ですがカンプは' + datum.property.fontFamily + '）<br>';
+          elementMessages += 'フォントが違います（コードは' + getFirstFontName(property.fontFamily) + 'ですがカンプは' + datum.property.fontFamily + '）<br>';
         }
         if (!property.isWebFont) {
           emphasises.push(7);
-          element_messages += 'Webフォントではありません<br>';
+          elementMessages += 'Webフォントではありません<br>';
         }
         if ( emphasises.length > 0 ) {
           // 要素のキャプチャを取得
@@ -406,11 +414,11 @@ const DEBUG_SCRIPT = async () => {
           }
           const capture = await dbggr('Page.captureScreenshot', captureParam);
           if (capture) {
-            element_messages = '<img src="data:image/png;base64,' + capture.data + '"><br>' + element_messages;
+            elementMessages = '<img src="data:image/png;base64,' + capture.data + '"><br>' + elementMessages;
             // デバッグ用Box情報
-            // element_messages += box.toString() + '<br>';
+            // elementMessages += box.toString() + '<br>';
           }
-          result_messages += '<div class="datum"><p>「' + nodeValue + '」</p>\n<p>' + element_messages + '</p></div>\n';
+          resultMessages += '<div class="datum"><p>「' + nodeValue + '」</p>\n<p>' + elementMessages + '</p></div>\n';
 
           PANEL.table(
             [
@@ -431,7 +439,7 @@ const DEBUG_SCRIPT = async () => {
       }
     }
     if (!found) {
-      result_messages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>要素が取得できません。</p></div>\n';
+      resultMessages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>要素が取得できません。</p></div>\n';
       PANEL.table(
         [
           "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",
@@ -447,53 +455,107 @@ const DEBUG_SCRIPT = async () => {
   }
 
   return slick;
-  // await chrome.debugger.detach(debuggee);
-};
-
-const num2hex = (num) => {
-  const hex = num.toString(16);
-  return (hex.length == 1) ? "0" + hex : hex;
-};
-
-const getImageFromScreen = async () => {
-  // アコーディオンが開いた後のメトリクスを取得する
-  METRICS = await dbggr("Page.getLayoutMetrics");
-
-  // 画面を最大化する
-  await dbggr("Emulation.setDeviceMetricsOverride",
-    {
-      width: METRICS.contentSize.width,
-      height: METRICS.contentSize.height,
-      deviceScaleFactor: 1,
-      mobile: true,
-      screenHeight: METRICS.contentSize.height
-    });
-
-  // キャプチャ
-  const capture = await dbggr("Page.captureScreenshot");
-
-  // 画面を戻す
-  await dbggr("Emulation.setDeviceMetricsOverride",
-    {
-      width: METRICS.cssLayoutViewport.clientWidth,
-      height: METRICS.cssLayoutViewport.clientHeight,
-      deviceScaleFactor: 1,
-      mobile: true,
-      screenHeight: METRICS.cssLayoutViewport.clientHeight
-    });
-
-  const img = document.createElement("img");
-  img.src = "data:image/png;base64," + capture.data;
-  
-  return new Promise((resolve) => {
-    img.onload = () => {
-      resolve(img);
-    };
-  });
 }
 
+async function getNodeIdFromCoordinate(x, y) {
+  const node = await dbggr("DOM.getNodeForLocation", { x, y });
+  if (!node) {
+    return null;
+  }
+  return node.nodeId;
+}
 
-const colorCheck = async () => {
+// background-colorかborder-*-widthを持っている要素のnodeIdを返す
+// それ以外は引数のnodeIdをそのまま返す
+async function changeTheNodeIdFromProperty(nodeId, properties) {
+  const property = properties.find((p) => p.type === 'background-color' || p.type.match(/^border-.*-width$/));
+  if (!property) {
+    return nodeId;
+  }
+
+  // 最大4階層親に戻る
+  let tempId = nodeId;
+  for (let i = 0; i < 4; i++) {
+    let styles;
+    try {
+      styles = (await dbggr("CSS.getComputedStyleForNode", { nodeId: tempId })).computedStyle;
+    }
+    catch (e) {
+      // エラー時はもとのnodeId
+      return nodeId;
+    }
+    const style = styles.find((p) => p.name === property.type);
+    if (
+      style.name === 'background-color' && style.value !== 'rgba(0, 0, 0, 0)' ||
+      style.name.match(/^border-.*-width$/) && style.value !== '0px'
+    ) {
+      // 見つかったらそのnodeId
+      return tempId;
+    }
+    else {
+      // 見つからなかったら親要素のnodeId
+      if (!findNodeById(tempId).parentId) {
+        return nodeId;
+      }
+      tempId = findNodeById(tempId).parentId;
+    }
+  }
+  // 見つからなかったらもとのnodeId
+  return nodeId;
+}
+
+function errorPropertyOutput(type, codeValue, value) {
+  let diff = `コード：${codeValue}，カンプ：${value}`;
+  PANEL.add(type + `の差異（${diff}）`);
+  checkElementsPropertiesMessage += `${type}の差異<span class="red">（${diff}）</span><br>`;
+}
+
+async function checkElementsProperties() {
+  PANEL.emptyLine();
+  PANEL.add("要素のプロパティチェック（背景色、境界線幅・色、境界角丸、高さ・幅）", "title");
+  const noticeMessage = `【注意】
+  ・差異があると報告されても鵜呑みにせずコードを確認してください
+  ・border-radius系はカンプより大きいと正常に見えます
+  ・CTAの色はRGBとRGBA（透明度あり＝カンプ通り）の両方で比較しています
+  ・高さや幅に小数点が含まれると、環境によって差異が出ます
+  ・色はrgbやrgba関数として出力されますが、デベロッパーツールの仕様です`;
+
+  PANEL.add(noticeMessage)
+  PANEL.emptyLine();
+  checkElementsPropertiesMessage = noticeMessage.replaceAll("\n", "<br>") + "<br>&nbsp;<br>";
+
+  for (let element of ELEMENT_PROPERTIES_PC) {
+    PANEL.add('◆' + element.name, 'emphasis');
+    checkElementsPropertiesMessage += '<strong>◆' + element.name + "</strong><br>";
+
+    // 比較要素が画面外なら移動する
+    const { cssLayoutViewport } = await dbggr("Page.getLayoutMetrics");
+    if (cssLayoutViewport.pageY > element.y || (cssLayoutViewport.pageY + cssLayoutViewport.clientHeight) <= element.y) {
+      // 比較要素を画面中央にする
+      chrome.devtools.inspectedWindow.eval("window.scrollTo(0," + (element.y - cssLayoutViewport.clientHeight / 2) + ")");
+      await wait(100);
+    }
+
+    let nodeId = await getNodeIdFromCoordinate(element.x, element.y);
+    if (!nodeId) {
+      PANEL.add(element.name + "が見つかりません。");
+      checkElementsPropertiesMessage += element.name + "が見つかりません。<br>";
+      continue;
+    }
+    nodeId = await changeTheNodeIdFromProperty(nodeId, element.properties);
+
+    const { computedStyle } = await dbggr("CSS.getComputedStyleForNode", { nodeId });
+    for (let property of element.properties) {
+      const value = findProperty(computedStyle, property.type).value;
+      if (value != property.value) {
+        if (property.orValue && value == property.orValue) {
+          continue;
+        }
+        errorPropertyOutput(property.type, value, property.value);
+      }
+    }
+  }
+  /*
   const colorTable = [
     { title:"ヘッダー",              x: 430,y:  50,color:"0079f2" },
     { title:"ボタン背景色",          x: 660,y: 965,color:"f11f8d" },
@@ -545,10 +607,11 @@ const colorCheck = async () => {
     PANEL.add('背景色の差異は確認できませんでした。');
     color_messages = '<li>背景色の差異は確認できませんでした。</li>'
   }
-};
+  */
+}
 
 
-const initDebug = async () => {
+async function initDebug() {
   const sDate = new Date();
   PANEL.add(
     "<<< 開始 " + sDate.toLocaleTimeString() + "." + sDate.getMilliseconds(),
@@ -571,9 +634,9 @@ const initDebug = async () => {
   // 一番上にスクロール
   chrome.devtools.inspectedWindow.eval("window.scrollTo(0,0)");
   await wait(500);
-};
+}
 
-const finishDebug = () => {
+function finishDebug () {
   PANEL.emptyLine();
   const eDate = new Date();
   PANEL.add(
@@ -581,7 +644,11 @@ const finishDebug = () => {
     "info",
   );
   PANEL.emptyLine();
-};
+}
+
+// --------------------
+// イベントリスナー
+// --------------------
 
 document.getElementById("detach").addEventListener("click", async (e) => {
   e.preventDefault();
@@ -593,8 +660,6 @@ document.getElementById("notice-close").addEventListener("click", (e) => {
   e.preventDefault();
   document.querySelector('header .notice').style.display = 'none';
 });
-
-  
 
 document.getElementById("checker").addEventListener("click", async (e) => {
   e.preventDefault();
@@ -611,13 +676,13 @@ document.getElementById("checker").addEventListener("click", async (e) => {
   await initDebug();
   const slick = await DEBUG_SCRIPT();
   if (METRICS.contentSize.width == 1536) {
-    await colorCheck();
+    await checkElementsProperties();
   }
   else {
     PANEL.emptyLine();
-    PANEL.add("背景色のチェック", "title");
+    PANEL.add("要素のプロパティチェック", "title");
     PANEL.add('チェックはPC版だけです');
-    color_messages = '<li>チェックはPC版だけです</li>';
+    checkElementsPropertiesMessage = 'チェックはPC版だけです';
   }
   finishDebug();
 
@@ -627,15 +692,14 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   // HTMLの取得
   try {
-    content = await dbggr('Page.getResourceContent', { frameId, url: frameTree.frame.url });
+    content = await dbggr('DOM.getOuterHTML', { nodeId: ROOT.nodeId });
   }
   catch (e) {
     PANEL.add('htmlが取得できませんでした。', 'error');
     return;
   }
-  const html = content.content;
-
-
+  const html = content.outerHTML;
+  
   // style.cssの取得
   const cssFile = frameTree.resources.find((r) => r.url.match(/\/style.css/));
   if (!cssFile) {
@@ -682,8 +746,8 @@ document.getElementById("checker").addEventListener("click", async (e) => {
       tables = tables + el.outerHTML;
     });
     this.document.querySelector('#messages .tables').innerHTML = tables;
-    this.document.querySelector('#messages .details').innerHTML = result_messages;
-    this.document.querySelector('#messages .color_check').innerHTML = color_messages;
+    this.document.querySelector('#messages .details').innerHTML = resultMessages;
+    this.document.querySelector('#messages .property_check').innerHTML = checkElementsPropertiesMessage;
     // await chrome.debugger.detach(debuggee);
   });
 
