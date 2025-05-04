@@ -1,8 +1,27 @@
+:root {
+  --body-bg-color: white;
+  --default-color: #282828;
+  --title-color: #0099ff;
+  --head-row-bg-color: #c0c;
+  --messages-table-border-color: #282828;
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --body-bg-color: #282828;
+    --default-color: white;
+    --title-color: #00ffff;
+    --head-row-bg-color: #808;
+    --messages-table-border-color: #eee;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
+  background-color: var(--body-bg-color);
+  color: var(--default-color);
 }
 header {
   position: sticky;
@@ -11,7 +30,7 @@ header {
   z-index: 1;
   width: 100%;
   padding: 8px;
-  background-color: white;
+  background-color: var(--body-bg-color)
 }
 .header-inner {
   display: flex;
@@ -66,7 +85,7 @@ header .notice-title h3 {
   margin-left: 1rem;
   font-size: 133.33333%;
   font-weight: bold;
-  color: #00ffff;
+  color: var(--title-color);
 }
 #messages > div.emphasis {
   font-weight: bold;
@@ -76,7 +95,7 @@ header .notice-title h3 {
 }
 #messages > .table {
   padding: 2px;
-  border: 1px solid #282828;
+  border: 1px solid var(--messages-table-border-color);
   margin-left: 1rem;
   margin-bottom: 2px;
 }
@@ -88,7 +107,7 @@ header .notice-title h3 {
 }
 .head .row {
   color: white;
-  background-color: #c0c;
+  background-color: var(--head-row-bg-color);
 }
 .col {
   width: 100px;
@@ -103,7 +122,7 @@ header .notice-title h3 {
 .col.em {
   background-color: #f00;
 }
-
+/*
 @media (prefers-color-scheme:dark) {
   body, header {
     background-color: #282828;
@@ -116,3 +135,4 @@ header .notice-title h3 {
     border: 1px solid #eee;
   }
 }
+*/

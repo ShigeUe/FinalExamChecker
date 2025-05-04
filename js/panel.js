@@ -26,6 +26,25 @@ async function dbggr(command, option) {
   }
 }
 
+function version2num(ver) {
+  const vers = ver.split('.');
+  return Number(vers[0]) * 100 + Number(vers[1]);
+};
+
+async function checkAppVersion() {
+  console.log('The version is checked.');
+
+  try {
+    const resp = await fetch('https://raw.githubusercontent.com/ShigeUe/FinalExamChecker/refs/heads/main/manifest.json');
+    const data = await resp.json();
+    const local = chrome.runtime.getManifest();
+
+    return (version2num(local.version) < version2num(data.version));
+  }
+  catch (e) {
+    return false;
+  }
+}
 
 const PANEL = {
   element: document.getElementById("messages"),
@@ -555,61 +574,7 @@ async function checkElementsProperties() {
       }
     }
   }
-  /*
-  const colorTable = [
-    { title:"ヘッダー",              x: 430,y:  50,color:"0079f2" },
-    { title:"ボタン背景色",          x: 660,y: 965,color:"f11f8d" },
-    { title:"キャンペーン",          x: 160,y:1200,color:"f2f8fe" },
-    { title:"コース案内ボタン選択色",x: 300,y:1630,color:"f2a118" },
-    { title:"コース案内ボタン",      x: 650,y:1630,color:"f0f0f0" },
-    { title:"コース案内ボタン",      x:1000,y:1630,color:"f0f0f0" },
-    { title:"コース案内枠",          x: 300,y:1685,color:"ffedcc" },
-    { title:"コース下の水色",        x: 160,y:2200,color:"f2f8fe" },
-    { title:"3つの特色下の水色",     x: 160,y:4000,color:"f2f8fe" },
-    { title:"講師紹介ケント",        x: 450,y:4440,color:"ffeee5" },
-    { title:"講師紹介ナンシー",      x: 850,y:4440,color:"fff6e5" },
-    { title:"講師紹介下の水色",      x: 160,y:5000,color:"f2f8fe" },
-    { title:"料金プラン表の見出し",  x: 435,y:5360,color:"f5f5f5" },
-    { title:"料金プラン表の見出し",  x: 435,y:5810,color:"f5f5f5" },
-    { title:"料金プラン下の水色",    x: 450,y:6400,color:"f2f8fe" },
-    { title:"よくあるご質問のA部分", x: 360,y:6890,color:"ffeee5" },
-    { title:"よくあるご質問下の水色",x: 150,y:7850,color:"f2f8fe" },
-    { title:"フッターの帯",          x: 150,y:8050,color:"222222" },
-  ];
-
-  const img = await getImageFromScreen();
-
-  const canvas = document.createElement("canvas");
-  canvas.width = METRICS.contentSize.width;
-  canvas.height = METRICS.contentSize.height;
-  console.log("カンバスの大きさ", canvas.width, canvas.height);
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-
-  context.drawImage(img, 0, 0);
-
-  
-  color_messages = '';
-
-  PANEL.emptyLine();
-  PANEL.add("背景色のチェック", "title");
-
-  let error = false;
-  for (let item of colorTable) {
-    const c = context.getImageData(item.x, item.y, 1, 1);
-    const hex = num2hex(c.data[0]) + num2hex(c.data[1]) + num2hex(c.data[2]);
-    if (hex != item.color) {
-      PANEL.add(item.title + `の色が違います（${item.color}が${hex}）`, "error");
-      color_messages += '<li class="red">' + item.title + `の色が違います（${item.color}が${hex}）</li>`;
-      error = true;
-    }
-  }
-  if (!error) {
-    PANEL.add('背景色の差異は確認できませんでした。');
-    color_messages = '<li>背景色の差異は確認できませんでした。</li>'
-  }
-  */
 }
-
 
 async function initDebug() {
   const sDate = new Date();
@@ -750,5 +715,10 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     this.document.querySelector('#messages .property_check').innerHTML = checkElementsPropertiesMessage;
     // await chrome.debugger.detach(debuggee);
   });
-
 });
+
+(async () => {
+  if (await checkAppVersion()) {
+    PANEL.add("新しいバージョンがあります。");
+  }
+})();
