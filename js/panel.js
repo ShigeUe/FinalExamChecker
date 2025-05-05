@@ -213,6 +213,24 @@ function getOutsideBox(quads) {
   return [left, top, right, bottom];
 }
 
+function inspectedWindowEval(code) {
+  return new Promise((f) => {
+    chrome.devtools.inspectedWindow.eval(code, (e) => f(e));
+  });
+}
+
+// HTMLソースを得る
+function getHTMLFromInspectedWindow() {
+  return new Promise((f) => {
+    chrome.devtools.inspectedWindow.getResources((resources) => {
+      const res = resources.find((r) => r.type === 'document');
+      if (!res) {
+        f('');
+      }
+      res.getContent((c) => f(c));
+    });
+  });
+}
 
 
 
@@ -586,20 +604,31 @@ async function initDebug() {
   );
 
   // コース案内をカンプの状態にする
-  chrome.devtools.inspectedWindow.eval(`$('main a:contains(6歳まで)').click();`);
+  await inspectedWindowEval(`$('main a:contains(6歳まで)').click();`);
   await wait(500);
   // アコーディオンを開く
-  chrome.devtools.inspectedWindow.eval(`$('main :contains(よくあるご質問)').eq(0).find('*:not(:visible)').show();`);
-  await wait(500);
+  if (!await inspectedWindowEval(`$(':contains(初めに受講者様と保護者様と面談を行い)').last().is(':visible')`)) {
+    await inspectedWindowEval(`$(':contains(オンラインの英会話教室は初めてで)').last().click();`);
+  }
+  if (!await inspectedWindowEval(`$(':contains(パソコンやスマートフォンだけでなく、)').last().is(':visible')`)) {
+    await inspectedWindowEval(`$(':contains(外出先でも受講)').last().click();`);
+  }
+  if (!await inspectedWindowEval(`$(':contains(授業料はコースによって異なります。)').last().is(':visible')`)) {
+    await inspectedWindowEval(`$(':contains(授業料はどのようになって)').last().click();`);
+  }
+  if (!await inspectedWindowEval(`$(':contains(兄弟だけでなく家族割引プランや)').last().is(':visible')`)) {
+    await inspectedWindowEval(`$(':contains(兄弟だけでの受講を検討)').last().click();`);
+  }
+  await wait(1000);
   // 一番下にスクロール
-  chrome.devtools.inspectedWindow.eval("window.scrollTo(0,100000)");
+  await inspectedWindowEval("window.scrollTo(0,100000)");
   await wait(1000);
   // slickの自動再生を止め最初のスライドに戻す
-  chrome.devtools.inspectedWindow.eval(`$('.slick-list').parent().slick('slickPause')`);
+  await inspectedWindowEval(`$('.slick-list').parent().slick('slickPause')`);
   await wait(1000);
-  chrome.devtools.inspectedWindow.eval(`$('.slick-list').parent().slick('slickGoTo', 0)`);
+  await inspectedWindowEval(`$('.slick-list').parent().slick('slickGoTo', 0)`);
   // 一番上にスクロール
-  chrome.devtools.inspectedWindow.eval("window.scrollTo(0,0)");
+  await inspectedWindowEval("window.scrollTo(0,0)");
   await wait(500);
 }
 
@@ -659,8 +688,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   // HTMLの取得
   try {
-    const { content } = await dbggr('Page.getResourceContent', { frameId, url: frameTree.frame.url });
-    html = content;
+    html = await getHTMLFromInspectedWindow();
   }
   catch (e) {
     PANEL.add('htmlが取得できませんでした。ソースを取得して設定してください。', 'error');
@@ -728,3 +756,5 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     PANEL.add("新しいバージョンがあります。");
   }
 })();
+
+chrome.devtools.inspectedWindow.reload();
