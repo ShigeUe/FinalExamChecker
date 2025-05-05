@@ -657,13 +657,13 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   // HTMLの取得
   try {
-    content = await dbggr('DOM.getOuterHTML', { nodeId: ROOT.nodeId });
+    content = await dbggr('Page.getResourceContent', { frameId, url: frameTree.frame.url });
   }
   catch (e) {
     PANEL.add('htmlが取得できませんでした。', 'error');
     return;
   }
-  const html = content.outerHTML;
+  const html = content.content;
   
   // style.cssの取得
   const cssFile = frameTree.resources.find((r) => r.url.match(/\/style.css/));
