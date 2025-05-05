@@ -60,6 +60,7 @@ const PANEL = {
       div.classList.add(type);
     }
     this.element.append(div);
+    window.scrollTo(0, document.body.scrollHeight);
   },
   table: function (header, body1, body2, emphasises) {
     const table = document.createElement("div");
@@ -114,6 +115,7 @@ const PANEL = {
     });
 
     this.element.append(table);
+    window.scrollTo(0, document.body.scrollHeight);
   },
   reset: function () {
     this.element.innerHTML = "";
@@ -653,17 +655,16 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   const { frameTree } = await dbggr('Page.getResourceTree');
   const frameId = frameTree.frame.id;
-  let content;
+  let html = '';
 
   // HTMLの取得
   try {
-    content = await dbggr('Page.getResourceContent', { frameId, url: frameTree.frame.url });
+    const { content } = await dbggr('Page.getResourceContent', { frameId, url: frameTree.frame.url });
+    html = content;
   }
   catch (e) {
-    PANEL.add('htmlが取得できませんでした。', 'error');
-    return;
+    PANEL.add('htmlが取得できませんでした。ソースを取得して設定してください。', 'error');
   }
-  const html = content.content;
   
   // style.cssの取得
   const cssFile = frameTree.resources.find((r) => r.url.match(/\/style.css/));
@@ -699,11 +700,16 @@ document.getElementById("checker").addEventListener("click", async (e) => {
   // チェッカー用ウィンドウ表示
   const win = window.open('checker.html');
   win.addEventListener('load', async function () {
-    this.document.querySelector('#html').value = html;
     this.document.querySelector('#css').value = css;
     this.document.querySelector('#js').value = js;
     this.document.querySelector('#slick').value = slick ? 1 : 0;
-    this.document.querySelector('.perform').click();
+    if (html) {
+      this.document.querySelector('#html').value = html;
+      this.document.querySelector('.perform').click();
+    }
+    else {
+      this.document.querySelector('.perform').parentElement.style.display = 'block';
+    }
     // this.document.querySelector('#FINAL-EXAM-CHECKER').submit();
 
     let tables = '';

@@ -23,9 +23,14 @@
 
   <main>
     <h2>ソースコードチェック</h2>
+
+    <p style="display: none">
+      <button type="button" class="perform">課題チェック実行</button>
+    </p>
+
     <h3>HTML</h3>
     <form action="https://validator.w3.org/nu/" method="POST" enctype="multipart/form-data" target="_blank" id="html-check-form">
-      <textarea id="html" name="fragment"></textarea>
+      <textarea id="html" name="fragment" placeholder="HTMLの取得に失敗しました。ソースを取得して設定してください。"></textarea>
       <input type="hidden" name="prefill" value="0">
       <input type="hidden" name="doctype" value="Inline">
       <input type="hidden" name="prefill_doctype" value="html401">
@@ -45,10 +50,6 @@
 
     <h3>JavaScript</h3>
     <textarea id="js"></textarea>
-
-    <p style="display: none">
-      <button type="button" class="perform">課題チェック再実行</button>
-    </p>
 
     <h2 id="SOURCE_CODE_CHECK">ソースコードチェック結果</h2>
     <input type="hidden" id="slick">
