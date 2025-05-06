@@ -163,25 +163,15 @@ button {
   padding: 1rem;
   width: fit-content;
 }
-/*
-@media (prefers-color-scheme:dark) {
-  body, header {
-    background-color: #282828;
-    color: white;
-  }
-  textarea {
-    border: 1px solid #ccc;
-    background-color: #282828;
-    color: white;
-  }
-  pre {
-    border: 1px dashed #ccc;
-  }
-  .head .row {
-    background-color: #808;
-  }
-  #messages > .table {
-    border: 1px solid #eee;
-  }
+.property-notice {
+  padding: 1em;
+  width: fit-content;
+  border-radius: 8px;
+  border: 1px solid #f0f;
 }
-*/
+
+.property_check strong {
+  font-size: 116.66666%;
+  display: inline-block;
+  margin-top: 0.5em;
+}

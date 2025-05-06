@@ -1,3 +1,5 @@
+@charset "UTF-8";
+
 :root {
   --body-bg-color: white;
   --default-color: #282828;
@@ -17,6 +19,9 @@
 
 * {
   box-sizing: border-box;
+}
+a {
+  text-decoration: none;
 }
 body {
   margin: 0;
@@ -81,11 +86,13 @@ header .notice-title h3 {
   background-color: rgb(255, 0, 0, 0.5);
 }
 #messages > div.title {
-  padding: 0;
+  padding: 3em 0 0;
   margin-left: 1rem;
   font-size: 133.33333%;
   font-weight: bold;
   color: var(--title-color);
+  user-select: none;
+  cursor: pointer;
 }
 #messages > div.emphasis {
   font-weight: bold;
@@ -122,17 +129,13 @@ header .notice-title h3 {
 .col.em {
   background-color: #f00;
 }
-/*
-@media (prefers-color-scheme:dark) {
-  body, header {
-    background-color: #282828;
-    color: white;
-  }
-  .head .row {
-    background-color: #808;
-  }
-  #messages > .table {
-    border: 1px solid #eee;
-  }
+.property-notice {
+  padding: 1em;
+  width: fit-content;
+  border-radius: 8px;
+  border: 1px solid #f0f;
 }
-*/
+
+ul.toc a {
+  color: var(--default-color);
+}

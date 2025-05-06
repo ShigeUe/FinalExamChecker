@@ -2,6 +2,7 @@ let ROOT;
 let ROOT_BODY;
 let debuggee;
 let attached = false;
+let processing = false;
 
 let results;
 let resultMessages;
@@ -24,6 +25,11 @@ async function dbggr(command, option) {
   else {
     return await chrome.debugger.sendCommand(debuggee, command, option);
   }
+}
+
+function makeHash(text){
+  const uint8  = new TextEncoder().encode(text)
+  return Array.from(new Uint8Array(uint8)).map(v => v.toString(16).padStart(2, '0')).join('').slice(0,8);
 }
 
 function version2num(ver) {
@@ -51,13 +57,22 @@ const PANEL = {
   add: function (str, type) {
     const div = document.createElement("div");
     if (str) {
-      div.innerText = str;
+      if (type == 'html') {
+        div.innerHTML = str;
+      } else {
+        div.innerText = str;
+      }
     } else {
       div.innerHTML = "&nbsp;";
     }
 
     if (type == "error" || type == "info" || type == "title" || type == "emphasis") {
       div.classList.add(type);
+      if (type == 'title') {
+        const hash = makeHash(str);
+        div.id = hash;
+        div.addEventListener('click', () =>window.scrollTo(0,0));
+      }
     }
     this.element.append(div);
     window.scrollTo(0, document.body.scrollHeight);
@@ -105,13 +120,15 @@ const PANEL = {
     table.addEventListener("mouseenter", async function (e) {
       const col = this.querySelector('.head .row .col:first-child');
       const nodeId = col.innerText.match(/\d+/)?.at(0) - 0;
-      if (nodeId) {
+      if (nodeId && !processing) {
         await dbggr("DOM.scrollIntoViewIfNeeded", { nodeId });
         await dbggr("Overlay.highlightNode", { highlightConfig: HIGHLIGHTCONFIG, nodeId });
       }
     });
     table.addEventListener("mouseleave", async function (e) {
-      await dbggr("Overlay.hideHighlight");
+      if (!processing) {
+        await dbggr("Overlay.hideHighlight");
+      }
     });
 
     this.element.append(table);
@@ -122,6 +139,19 @@ const PANEL = {
   },
   emptyLine: function () {
     this.add(null);
+  },
+  makeToc: function () {
+    const ul = document.createElement("ul");
+    ul.classList.add('toc');
+    this.element.querySelectorAll('.title').forEach((ele) => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = "#" + ele.id;
+      a.innerText = ele.innerText;
+      li.append(a);
+      ul.append(li);
+    });
+    this.element.prepend(ul);
   },
 };
 
@@ -478,16 +508,16 @@ async function DEBUG_SCRIPT() {
       }
     }
     if (!found) {
-      resultMessages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>要素が取得できません。</p></div>\n';
+      resultMessages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>要素が取得できません。打ち間違いをチェックしてください。</p></div>\n';
       PANEL.table(
         [
           "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",
         ],
         [
-          datum.nodeValue, datum.property.color, datum.property.fontSize, datum.property.fontWeight,
+          datum.nodeValue, rgb2hex(datum.property.color), datum.property.fontSize, datum.property.fontWeight,
           datum.property.fontStyle, datum.property.fontFamily, "",
         ],
-        [ '要素が取得できません', '', '', '', '', '', '', ],
+        [ '要素が取得できません。打ち間違いをチェックしてください。', '', '', '', '', '', '', ],
         []
       );
     }
@@ -552,16 +582,16 @@ function errorPropertyOutput(type, codeValue, value) {
 async function checkElementsProperties() {
   PANEL.emptyLine();
   PANEL.add("要素のプロパティチェック（背景色、境界線幅・色、境界角丸、高さ・幅）", "title");
-  const noticeMessage = `【注意】
-  ・差異があると報告されても鵜呑みにせずコードを確認してください
-  ・border-radius系はカンプより大きいと正常に見えます
-  ・CTAの色はRGBとRGBA（透明度あり＝カンプ通り）の両方で比較しています
-  ・高さや幅に小数点が含まれると、環境によって差異が出ます
-  ・色はrgbやrgba関数として出力されますが、デベロッパーツールの仕様です`;
+  const noticeMessage = `<p class="property-notice">【注意】<br>
+  ・差異があると報告されても鵜呑みにせずコードを確認してください<br>
+  ・border-radius系はカンプより大きいと正常に見えます<br>
+  ・CTAの色はRGBとRGBA（透明度あり＝カンプ通り）の両方で比較しています<br>
+  ・高さや幅に小数点が含まれると、環境によって差異が出ます<br>
+  ・色はrgbやrgba関数として出力されますが、デベロッパーツールの仕様です</p>`;
 
-  PANEL.add(noticeMessage)
+  PANEL.add(noticeMessage, 'html');
   PANEL.emptyLine();
-  checkElementsPropertiesMessage = noticeMessage.replaceAll("\n", "<br>") + "<br>&nbsp;<br>";
+  checkElementsPropertiesMessage = noticeMessage + "<br>";
 
   for (let element of ELEMENT_PROPERTIES_PC) {
     PANEL.add('◆' + element.name, 'emphasis');
@@ -571,7 +601,7 @@ async function checkElementsProperties() {
     const { cssLayoutViewport } = await dbggr("Page.getLayoutMetrics");
     if (cssLayoutViewport.pageY > element.y || (cssLayoutViewport.pageY + cssLayoutViewport.clientHeight) <= element.y) {
       // 比較要素を画面中央にする
-      chrome.devtools.inspectedWindow.eval("window.scrollTo(0," + (element.y - cssLayoutViewport.clientHeight / 2) + ")");
+      await inspectedWindowEval("window.scrollTo(0," + (element.y - cssLayoutViewport.clientHeight / 2) + ")");
       await wait(100);
     }
 
@@ -581,8 +611,9 @@ async function checkElementsProperties() {
       checkElementsPropertiesMessage += element.name + "が見つかりません。<br>";
       continue;
     }
-    nodeId = await changeTheNodeIdFromProperty(nodeId, element.properties);
 
+    nodeId = await changeTheNodeIdFromProperty(nodeId, element.properties);
+    let error = false;
     const { computedStyle } = await dbggr("CSS.getComputedStyleForNode", { nodeId });
     for (let property of element.properties) {
       const value = findProperty(computedStyle, property.type).value;
@@ -591,12 +622,22 @@ async function checkElementsProperties() {
           continue;
         }
         errorPropertyOutput(property.type, value, property.value);
+        error = true;
       }
     }
+
+    if (!error) {
+      PANEL.add("差異はありません。");
+      checkElementsPropertiesMessage += "差異はありません<br>";
+    }
   }
+  await inspectedWindowEval("window.scrollTo(0,0)");
+  await wait(200);
 }
 
 async function initDebug() {
+  processing = true;
+
   const sDate = new Date();
   PANEL.add(
     "<<< 開始 " + sDate.toLocaleTimeString() + "." + sDate.getMilliseconds(),
@@ -632,7 +673,9 @@ async function initDebug() {
   await wait(500);
 }
 
-function finishDebug () {
+function finishDebug() {
+  processing = false;
+
   PANEL.emptyLine();
   const eDate = new Date();
   PANEL.add(
@@ -670,7 +713,6 @@ document.getElementById("checker").addEventListener("click", async (e) => {
   }
 
   await initDebug();
-  const slick = await DEBUG_SCRIPT();
   if (METRICS.contentSize.width == 1536) {
     await checkElementsProperties();
   }
@@ -680,6 +722,9 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     PANEL.add('チェックはPC版だけです');
     checkElementsPropertiesMessage = 'チェックはPC版だけです';
   }
+  const slick = await DEBUG_SCRIPT();
+  await wait(100);
+  PANEL.makeToc();
   finishDebug();
 
   const { frameTree } = await dbggr('Page.getResourceTree');
@@ -749,6 +794,8 @@ document.getElementById("checker").addEventListener("click", async (e) => {
     this.document.querySelector('#messages .property_check').innerHTML = checkElementsPropertiesMessage;
     // await chrome.debugger.detach(debuggee);
   });
+  await wait(100);
+  window.scrollTo(0, 0);
 });
 
 (async () => {
