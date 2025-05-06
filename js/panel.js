@@ -584,7 +584,7 @@ async function checkElementsProperties() {
   PANEL.add("要素のプロパティチェック（背景色、境界線幅・色、境界角丸、高さ・幅）", "title");
   const noticeMessage = `<p class="property-notice">【注意】<br>
   ・差異があると報告されても鵜呑みにせずコードを確認してください<br>
-  ・border-radius系はカンプより大きいと正常に見えます<br>
+  ・border-radius系は上下がくっつく場合カンプより大きいと正常に見えます<br>
   ・CTAの色はRGBとRGBA（透明度あり＝カンプ通り）の両方で比較しています<br>
   ・高さや幅に小数点が含まれると、環境によって差異が出ます<br>
   ・色はrgbやrgba関数として出力されますが、デベロッパーツールの仕様です</p>`;
