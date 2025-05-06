@@ -800,7 +800,10 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
 (async () => {
   if (await checkAppVersion()) {
-    PANEL.add("新しいバージョンがあります。");
+    PANEL.add("新しいバージョンがあります。", "error");
+  }
+  else {
+    PANEL.add("Version:" + chrome.runtime.getManifest().version);
   }
 })();
 
