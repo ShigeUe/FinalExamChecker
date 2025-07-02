@@ -612,23 +612,28 @@ async function checkElementsProperties() {
       continue;
     }
 
-    nodeId = await changeTheNodeIdFromProperty(nodeId, element.properties);
-    let error = false;
-    const { computedStyle } = await dbggr("CSS.getComputedStyleForNode", { nodeId });
-    for (let property of element.properties) {
-      const value = findProperty(computedStyle, property.type).value;
-      if (value != property.value) {
-        if (property.orValue && value == property.orValue) {
-          continue;
+    try {
+      nodeId = await changeTheNodeIdFromProperty(nodeId, element.properties);
+      let error = false;
+      const { computedStyle } = await dbggr("CSS.getComputedStyleForNode", { nodeId });
+      for (let property of element.properties) {
+        const value = findProperty(computedStyle, property.type).value;
+        if (value != property.value) {
+          if (property.orValue && value == property.orValue) {
+            continue;
+          }
+          errorPropertyOutput(property.type, value, property.value);
+          error = true;
         }
-        errorPropertyOutput(property.type, value, property.value);
-        error = true;
+      }
+
+      if (!error) {
+        PANEL.add("差異はありません。");
+        checkElementsPropertiesMessage += "差異はありません<br>";
       }
     }
-
-    if (!error) {
-      PANEL.add("差異はありません。");
-      checkElementsPropertiesMessage += "差異はありません<br>";
+    catch (e) {
+      console.log(e);
     }
   }
   await inspectedWindowEval("window.scrollTo(0,0)");
