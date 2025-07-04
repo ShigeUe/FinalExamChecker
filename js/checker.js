@@ -108,7 +108,7 @@
       console.error(ex);
       return 'エラーチェックが失敗しました';
     }
-    
+
     const data = await res.json();
     if (data?.cssvalidation?.result?.hasOwnProperty('errorcount')) {
       if (data.cssvalidation.result.errorcount === 0) {
@@ -386,7 +386,7 @@
     html2canvas(document.querySelector('#messages .tables')).then((canvas) => {
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png");
-      link.download = "CHECK_LIST_" + (new Date).toLocaleString().replaceAll(/[\/: ]/g,'_') + ".png";
+      link.download = "CHECK_LIST_" + (new Date).toLocaleString().replaceAll(/[\/: ]/g, '_') + ".png";
       link.click();
     });
 
@@ -397,48 +397,156 @@
     html2canvas(document.querySelector('#messages .details')).then((canvas) => {
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png");
-      link.download = "CHECK_DETAILS_" + (new Date).toLocaleString().replaceAll(/[\/: ]/g,'_') + ".png";
+      link.download = "CHECK_DETAILS_" + (new Date).toLocaleString().replaceAll(/[\/: ]/g, '_') + ".png";
       link.click();
-    });    
+    });
   });
 
-  document.querySelector('#messages .tables').addEventListener('dblclick', async (e) => {
-    let element = e.target;
-    while (element && !element.classList.contains('table')) {
-      element = element.parentElement;
+  // アンドゥ機能とインタラクティブ要素管理
+  const UndoManager = {
+    history: [],
+    maxHistorySize: 50,
+
+    pushState(element, action) {
+      this.history.push({
+        element,
+        action,
+        timestamp: Date.now()
+      });
+
+      if (this.history.length > this.maxHistorySize) {
+        this.history.shift();
+      }
+    },
+
+    undo() {
+      if (this.history.length === 0) {
+        showToast('元に戻せる操作がありません', 'info');
+        return false;
+      }
+
+      const lastState = this.history.pop();
+      if (lastState.action === 'delete') {
+        lastState.element.classList.remove('deleted');
+        showToast('削除を元に戻しました', 'info');
+      }
+      return false;
     }
-    if (element) {
+  };
+
+  // トーストメッセージ表示
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    // アニメーション開始
+    setTimeout(() => {
+      toast.classList.add('show');
+    }, 10);
+
+    // 3秒後に削除
+    setTimeout(() => {
+      toast.classList.remove('show');
       setTimeout(() => {
-        element.style = 'background-color: rgba(255,0,0,0.5)';
-        setTimeout(() => {
-          if (confirm(`削除します。\nよろしいですか？`)) {
-            element.remove();
-          }
-          else {
-            element.style = '';
-          }    
-        }, 100)
-      }, 0);
+        if (toast.parentElement) {
+          toast.parentElement.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  // 削除アニメーション
+  function deleteElementWithAnimation(element, actionType = '要素') {
+    if (element.classList.contains('deleting')) {
+      return; // 既に削除中の場合は何もしない
+    }
+
+    // アンドゥ用の状態を保存
+    UndoManager.pushState(element, 'delete');
+
+    element.classList.add('deleting');
+
+    setTimeout(() => {
+      if (element.parentElement) {
+        // element.remove();
+        element.classList.add('deleted');
+        element.classList.remove('deleting');
+        showToast(`${actionType}を削除しました`);
+      }
+    }, 500);
+  }
+
+  // 連続削除防止
+
+  let lastDeleteTime = 0;
+  const DELETE_COOLDOWN = 700; // 700ms
+
+  function canDelete() {
+    const now = Date.now();
+    if (now - lastDeleteTime < DELETE_COOLDOWN) {
+      showToast('削除操作が早すぎます。少し待ってから再度お試しください。', 'error');
+      return false;
+    }
+    lastDeleteTime = now;
+    return true;
+  }
+
+  // 要素にイベントリスナーを追加
+  function processEventListener(event) {
+    const element = event.target;
+    const type = event.type;
+    console.log(event);
+
+    if (type == "dblclick" && element.closest('.head')) {
+      if (canDelete()) {
+        deleteElementWithAnimation(element.closest('.table'), 'テーブル行');
+      }
+      return;
+    }
+    // if (type == "click" && element.closest('.body')) {
+    //   if (canDelete()) {
+    //     deleteElementWithAnimation(element.closest('.row'), '行');
+    //   }
+    //   return;
+    // }
+    if (type == "dblclick" && element.classList.contains('datum')) {
+      if (canDelete()) {
+        deleteElementWithAnimation(element, '詳細ブロック');
+      }
+      return;
+    }
+    // if (element.classList.contains('detail-text') && type == 'click') {
+    //   if (canDelete()) {
+    //     deleteElementWithAnimation(element, '詳細要素');
+    //   }
+    //   return;
+    // }
+    if (element.tagName === 'IMG' && type == 'click') {
+      if (canDelete()) {
+        deleteElementWithAnimation(element.closest('div'), '詳細要素');
+      }
+      return;
+    }
+  }
+
+  // キーボードショートカット（Command/Ctrl + Z）
+  document.addEventListener('keydown', (e) => {
+    console.log(e);
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Z' && e.shiftKey) {
+      e.preventDefault();
+      UndoManager.undo();
     }
   });
 
-  document.querySelector('#messages .details').addEventListener('dblclick', (e) => {
-    let element = e.target;
-    while (element && !element.classList.contains('datum')) {
-      element = element.parentElement;
-    }
-    if (element) {
-      setTimeout(() => {
-        element.style = 'background-color: rgba(255,0,0,0.5)';
-        setTimeout(() => {
-          if (confirm(`削除します。\nよろしいですか？`)) {
-            element.remove();
-          }
-          else {
-            element.style = '';
-          }    
-        }, 100)
-      }, 0);
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+    // document.querySelector('#messages .tables').addEventListener('click', processEventListener);
+    document.querySelector('#messages .tables').addEventListener('dblclick', processEventListener);
+    document.querySelector('#messages .details').addEventListener('click', processEventListener);
+    document.querySelector('#messages .details').addEventListener('dblclick', processEventListener);
   });
+
 })();

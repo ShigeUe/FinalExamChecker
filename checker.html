@@ -60,14 +60,32 @@
       <div class="property_check"></div>
       <h2 id="CHECK_LIST">文字要素のチェック一覧</h2>
       <a href="#" id="CHECK_LIST_DOWNLOAD">下記一覧をPNGでダウンロードします。</a><br>
-      ダブルクリックすると行を削除できます。
+      <div class="operation-guide">
+        <p><strong>操作方法:</strong></p>
+        <ul>
+          <li>ラベル行ダブルクリック: 行全体を削除</li>
+          <li>評価行は編集可能</li>
+          <li>Command + Shift + Z (Ctrl + Shift + Z): 削除操作を元に戻す</li>
+        </ul>
+      </div>
       <div class="tables"></div>
       <h2 id="CHECK_DETAILS">文字要素のチェック詳細</h2>
       <a href="#" id="CHECK_DETAILS_DOWNLOAD">下記詳細をPNGでダウンロードします。</a><br>
-      ダブルクリックすると行を削除できます。
+      <div class="operation-guide">
+        <p><strong>操作方法:</strong></p>
+        <ul>
+          <li>余白ダブルクリック: 詳細ブロック全体を削除</li>
+          <li>文字・画像クリック: 個別要素を削除</li>
+          <li>Command + Shift + Z (Ctrl + Shift + Z): 削除操作を元に戻す</li>
+        </ul>
+      </div>
       <div class="details"></div>
     </div>
   </main>
+
+  <!-- トーストメッセージコンテナ -->
+  <div class="toast-container" id="toast-container"></div>
+
   <script src="js/html2canvas.min.js"></script>
   <script src="js/checker.js"></script>
 </body>

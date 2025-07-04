@@ -95,22 +95,29 @@ const PANEL = {
     for (let i = 0; i < body1.length; i++) {
       const th = document.createElement("div");
       th.classList.add('col');
+      th.innerText = (header[i]) ?? "";
+      h_tr.append(th);
+
       const td1 = document.createElement("div");
       td1.classList.add('col');
-      const td2 = document.createElement("div");
-      td2.classList.add('col');
-
-      // エラーを強調する
-      if (emphasises.indexOf(i + 1) >= 0) {
-        td2.classList.add('em');
-      }
-
-      th.innerText = (header[i]) ?? "";
       td1.innerText = body1[i];
-      td2.innerText = body2[i];
-      h_tr.append(th);
       b1_tr.append(td1);
-      b2_tr.append(td2);
+
+      if (body2[i] != '') {
+        const td2 = document.createElement("div");
+        td2.classList.add('col');
+        td2.setAttribute('contenteditable', '');
+
+        // エラーを強調する
+        if (emphasises.indexOf(i + 1) >= 0) {
+          td2.classList.add('em');
+        }
+        if (body2[i].indexOf('要素が取得できません') >= 0) {
+          td2.style.width = '100%';
+        }
+        td2.innerText = body2[i];
+        b2_tr.append(td2);
+      }
     }
     thead.append(h_tr);
     tbody.append(b1_tr);
@@ -483,11 +490,11 @@ async function DEBUG_SCRIPT() {
           }
           const capture = await dbggr('Page.captureScreenshot', captureParam);
           if (capture) {
-            elementMessages = '<img src="data:image/png;base64,' + capture.data + '"><br>' + elementMessages;
+            elementMessages = '<div><img src="data:image/png;base64,' + capture.data + '"></div><p class="detail-text" contenteditable>' + elementMessages + "</p>";
             // デバッグ用Box情報
             // elementMessages += box.toString() + '<br>';
           }
-          resultMessages += '<div class="datum"><p>「' + nodeValue + '」</p>\n<p>' + elementMessages + '</p></div>\n';
+          resultMessages += '<div class="datum"><p class="detail-text">「' + nodeValue + '」</p>' + elementMessages + '</div>\n';
 
           PANEL.table(
             [
@@ -508,7 +515,7 @@ async function DEBUG_SCRIPT() {
       }
     }
     if (!found) {
-      resultMessages += '<div class="datum"><p>「' + datum.nodeValue + '」</p>\n<p>要素が取得できません。打ち間違いをチェックしてください。</p></div>\n';
+      resultMessages += '<div class="datum"><p class="detail-text">「' + datum.nodeValue + '」</p>\n<p class="detail-text" contenteditable>要素が取得できません。打ち間違いをチェックしてください。</p></div>\n';
       PANEL.table(
         [
           "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",
