@@ -494,7 +494,7 @@ async function DEBUG_SCRIPT() {
             // デバッグ用Box情報
             // elementMessages += box.toString() + '<br>';
           }
-          resultMessages += '<div class="datum"><p class="detail-text">「' + nodeValue + '」</p>' + elementMessages + '</div>\n';
+          resultMessages += '<div class="datum"><p class="detail-title">「' + datum.nodeValue + '」</p>' + elementMessages + '</div>\n';
 
           PANEL.table(
             [
@@ -515,7 +515,7 @@ async function DEBUG_SCRIPT() {
       }
     }
     if (!found) {
-      resultMessages += '<div class="datum"><p class="detail-text">「' + datum.nodeValue + '」</p>\n<p class="detail-text" contenteditable>要素が取得できません。打ち間違いをチェックしてください。</p></div>\n';
+      resultMessages += '<div class="datum"><p class="detail-title">「' + datum.nodeValue + '」</p>\n<p class="detail-text" contenteditable>要素が取得できません。打ち間違いをチェックしてください。</p></div>\n';
       PANEL.table(
         [
           "内容", "color", "font-size", "font-weight", "font-style", "font-family", "Webフォントか",

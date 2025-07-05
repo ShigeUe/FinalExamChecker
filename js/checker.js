@@ -499,7 +499,6 @@
   function processEventListener(event) {
     const element = event.target;
     const type = event.type;
-    console.log(event);
 
     if (type == "dblclick" && element.closest('.head')) {
       if (canDelete()) {
@@ -516,6 +515,13 @@
     if (type == "dblclick" && element.classList.contains('datum')) {
       if (canDelete()) {
         deleteElementWithAnimation(element, '詳細ブロック');
+      }
+      return;
+    }
+    if (type == "dblclick" && element.children[0]?.tagName === 'IMG') {
+      if (canDelete()) {
+        const tmpElement = element.closest('.datum');
+        deleteElementWithAnimation(tmpElement, '詳細ブロック');
       }
       return;
     }
@@ -543,10 +549,8 @@
   });
 
   document.addEventListener('DOMContentLoaded', () => {
-    // document.querySelector('#messages .tables').addEventListener('click', processEventListener);
-    document.querySelector('#messages .tables').addEventListener('dblclick', processEventListener);
-    document.querySelector('#messages .details').addEventListener('click', processEventListener);
-    document.querySelector('#messages .details').addEventListener('dblclick', processEventListener);
+    document.querySelector('#messages').addEventListener('click', processEventListener);
+    document.querySelector('#messages').addEventListener('dblclick', processEventListener);
   });
 
 })();

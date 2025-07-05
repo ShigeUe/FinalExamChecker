@@ -218,8 +218,18 @@ button {
   cursor: pointer;
 }
 
-.datum .detail-text:hover {
+.datum .detail-title {
+  user-select: none;
+  width: fit-content;
+}
+
+.datum .detail-text:hover,
+.datum .detail-title:hover {
   cursor: auto;
+}
+
+.datum img {
+  user-select: none;
 }
 
 /* トーストメッセージ */
