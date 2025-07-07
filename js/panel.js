@@ -19,17 +19,24 @@ async function dbggr(command, option) {
   if (!attached) {
     return;
   }
-  if (typeof option === 'undefined') {
-    return await chrome.debugger.sendCommand(debuggee, command);
+  let result = null;
+  try {
+    if (typeof option === 'undefined') {
+      result = await chrome.debugger.sendCommand(debuggee, command);
+    }
+    else {
+      result = await chrome.debugger.sendCommand(debuggee, command, option);
+    }
   }
-  else {
-    return await chrome.debugger.sendCommand(debuggee, command, option);
+  catch (e) {
+    console.log(e);
   }
+  return result;
 }
 
-function makeHash(text){
-  const uint8  = new TextEncoder().encode(text)
-  return Array.from(new Uint8Array(uint8)).map(v => v.toString(16).padStart(2, '0')).join('').slice(0,8);
+function makeHash(text) {
+  const uint8 = new TextEncoder().encode(text)
+  return Array.from(new Uint8Array(uint8)).map(v => v.toString(16).padStart(2, '0')).join('').slice(0, 8);
 }
 
 function version2num(ver) {
@@ -71,7 +78,7 @@ const PANEL = {
       if (type == 'title') {
         const hash = makeHash(str);
         div.id = hash;
-        div.addEventListener('click', () =>window.scrollTo(0,0));
+        div.addEventListener('click', () => window.scrollTo(0, 0));
       }
     }
     this.element.append(div);
@@ -194,7 +201,7 @@ function getFirstFontName(fontFamily) {
 function wait(t) {
   return new Promise((f) => {
     setTimeout(f, t);
-  }, () => {});
+  }, () => { });
 }
 
 function rgb2hex(rgb) {
@@ -300,7 +307,7 @@ async function startDebugger() {
   METRICS = await dbggr("Page.getLayoutMetrics");
 
   if (METRICS.contentSize.width != 1536 && METRICS.contentSize.width != 390) {
-    PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。（検出サイズ：" + METRICS.contentSize.width +"）", "error");
+    PANEL.add("ウィンドウサイズは390pxか1536pxにしてください。（検出サイズ：" + METRICS.contentSize.width + "）", "error");
     return false;
   }
   if (METRICS.contentSize.width == 1536) {
@@ -341,7 +348,7 @@ async function DEBUG_SCRIPT() {
         }
       }
 
-      const { quads } = await dbggr("DOM.getContentQuads", { nodeId: node.nodeId });
+      const { quads } = (await dbggr("DOM.getContentQuads", { nodeId: node.nodeId })) ?? { quads: [] };
       // 見えていない（quadsが無い）要素は飛ばす
       if (!quads.length) {
         return;
@@ -350,9 +357,9 @@ async function DEBUG_SCRIPT() {
       // 左上、右下のboxを定義
       const box = getOutsideBox(quads);
       // 適用されているFontを取得
-      const { fonts } = await dbggr("CSS.getPlatformFontsForNode", { nodeId: node.nodeId });
+      const { fonts } = (await dbggr("CSS.getPlatformFontsForNode", { nodeId: node.nodeId })) ?? { fonts: [] };
       // 計算済スタイルを取得
-      const { computedStyle } = await dbggr("CSS.getComputedStyleForNode", { nodeId: node.parentId ?? node.nodeId });
+      const { computedStyle } = (await dbggr("CSS.getComputedStyleForNode", { nodeId: node.parentId ?? node.nodeId })) ?? { computedStyle: {} };
       // 疑似要素の場合、contentをnodeValueにする
       if (node.pseudoType) {
         node.nodeValue = findProperty(computedStyle, "content").value;
@@ -370,19 +377,13 @@ async function DEBUG_SCRIPT() {
           if (font.isCustomFont) {
             allFonts[font.familyName + " - Webフォント"] = font.isCustomFont;
           } else {
-            // await dbggr('DOM.setAttributeValue', {
-            //   nodeId: node.parentId,
-            //   name: 'style',
-            //   value: 'background-color: rgba(255,0,0,0.5)'
-            // });
             allFonts[font.familyName + " - ローカルフォント"] = font.isCustomFont;
             property.isWebFont = false;
           }
         }
       }
-      // console.log(node.nodeId, parentNode,node.nodeValue, property);
       const nodeValue = node.nodeValue.trim();
-      results.push({ nodeId: node.nodeId, nodeValue, box, property});
+      results.push({ nodeId: node.nodeId, nodeValue, box, property });
     }
     if (node.childNodeCount) {
       for (let i = 0; i < node.childNodeCount; i++) {
@@ -430,7 +431,7 @@ async function DEBUG_SCRIPT() {
           }
           resolve();
         }
-      );  
+      );
     });
   })();
 
@@ -478,7 +479,7 @@ async function DEBUG_SCRIPT() {
           emphasises.push(7);
           elementMessages += 'Webフォントではありません<br>';
         }
-        if ( emphasises.length > 0 ) {
+        if (emphasises.length > 0) {
           // 要素のキャプチャを取得
           const captureParam = {
             "format": "png", "quality": 100, "fromSurface": true, "captureBeyondViewport": true,
@@ -524,7 +525,7 @@ async function DEBUG_SCRIPT() {
           datum.nodeValue, rgb2hex(datum.property.color), datum.property.fontSize, datum.property.fontWeight,
           datum.property.fontStyle, datum.property.fontFamily, "",
         ],
-        [ '要素が取得できません。打ち間違いをチェックしてください。', '', '', '', '', '', '', ],
+        ['要素が取得できません。打ち間違いをチェックしてください。', '', '', '', '', '', '',],
         []
       );
     }
@@ -605,8 +606,8 @@ async function checkElementsProperties() {
     checkElementsPropertiesMessage += '<strong>◆' + element.name + "</strong><br>";
 
     // 比較要素が画面外なら移動する
-    const { cssLayoutViewport } = await dbggr("Page.getLayoutMetrics");
-    if (cssLayoutViewport.pageY > element.y || (cssLayoutViewport.pageY + cssLayoutViewport.clientHeight) <= element.y) {
+    const { cssLayoutViewport } = (await dbggr("Page.getLayoutMetrics")) ?? { cssLayoutViewport: null };
+    if (cssLayoutViewport && (cssLayoutViewport.pageY > element.y || (cssLayoutViewport.pageY + cssLayoutViewport.clientHeight) <= element.y)) {
       // 比較要素を画面中央にする
       await inspectedWindowEval("window.scrollTo(0," + (element.y - cssLayoutViewport.clientHeight / 2) + ")");
       await wait(100);
@@ -750,7 +751,7 @@ document.getElementById("checker").addEventListener("click", async (e) => {
   catch (e) {
     PANEL.add('htmlが取得できませんでした。ソースを取得して設定してください。', 'error');
   }
-  
+
   // style.cssの取得
   const cssFile = frameTree.resources.find((r) => r.url.match(/\/style.css/));
   if (!cssFile) {
