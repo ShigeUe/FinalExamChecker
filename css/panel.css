@@ -94,6 +94,10 @@ header .notice-title h3 {
   user-select: none;
   cursor: pointer;
 }
+#messages > div.notice {
+  color: red;
+  font-weight: bold;
+}
 #messages > div.emphasis {
   font-weight: bold;
 }
@@ -105,6 +109,9 @@ header .notice-title h3 {
   border: 1px solid var(--messages-table-border-color);
   margin-left: 1rem;
   margin-bottom: 2px;
+}
+#messages > div.position-relative {
+  cursor: pointer;
 }
 .row {
   display: flex;

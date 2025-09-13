@@ -1,0 +1,17 @@
+{
+  "name": "final-exam-checker",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "UENISHI Shigefumi",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx webpack build",
+    "release": "npx webpack --mode production"
+  },
+  "devDependencies": {
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
+  }
+}
