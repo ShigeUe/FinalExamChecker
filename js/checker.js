@@ -170,6 +170,7 @@
     }
     let googleFontNotoSansOK = false;
     let googleFontPoppinsOK = false;
+    let googleFontOther = false;
     googleFonts.forEach((ele) => {
       const url = new URL(ele.href);
       const families = url.searchParams.getAll('family');
@@ -177,11 +178,14 @@
         if (f.match('Noto Sans JP')) {
           googleFontNotoSansOK = (f == 'Noto Sans JP:wght@400;700' || f == 'Noto Sans JP:wght@100..900');
         }
-        if (f.match('Poppins')) {
+        else if (f.match('Poppins')) {
           googleFontPoppinsOK = (
             f == 'Poppins:ital,wght@0,700;0,800;1,700;1,800' ||
             f == 'Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900'
           );
+        }
+        else {
+          googleFontOther = true;
         }
       }
     });
@@ -191,6 +195,10 @@
     }
     if (!googleFontPoppinsOK) {
       write(`<span class="red">Poppinsの読み込みが正しくありません</span>`, true);
+      fontFamilyError = true;
+    }
+    if (googleFontOther) {
+      write(`<span class="red">Noto Sans JP・Poppins以外が読み込まれています。</span>`, true);
       fontFamilyError = true;
     }
     if (fontFamilyError) {
