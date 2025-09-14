@@ -1,16 +1,16 @@
 import { States } from "./states.class.js";
 import { wait } from "./utils.js";
 
-export async function makeCheckerWindow(html, css, js, slick) {
+export async function makeCheckerWindow() {
 
 // チェッカー用ウィンドウ表示
   const win = window.open('checker.html');
   win.addEventListener('load', async function () {
-    this.document.querySelector('#css').value = css;
-    this.document.querySelector('#js').value = js;
-    this.document.querySelector('#slick').value = slick ? 1 : 0;
-    if (html) {
-      this.document.querySelector('#html').value = html;
+    this.document.querySelector('#css').value = States.SOURCE_CSS;
+    this.document.querySelector('#js').value = States.SOURCE_JS;
+    this.document.querySelector('#slick').value = States.SLICK ? 1 : 0;
+    if (States.SOURCE_HTML) {
+      this.document.querySelector('#html').value = States.SOURCE_HTML;
       this.document.querySelector('.perform').click();
     }
     else {

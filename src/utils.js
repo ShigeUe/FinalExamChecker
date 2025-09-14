@@ -42,25 +42,3 @@ export function inspectedWindowEval(code) {
     chrome.devtools.inspectedWindow.eval(code, (e) => f(e));
   });
 }
-
-// リソースを得る
-export async function getResource(filename) {
-  const reg = new RegExp("\/" + filename);
-  return new Promise((f) => {
-    chrome.devtools.inspectedWindow.getResources((resources) => {
-      const res = resources.find((r) => r.url.match(reg));
-      if (!res) {
-        PANEL.add(`${filename}が読み込まれていません。`, 'error');
-        f('');
-      }
-      res.getContent((c) => {
-        if (!c) {
-          PANEL.add(`${filename}が取得できませんでした。`, 'error');
-          f('');
-          return;
-        }
-        f(c);
-      });
-    });
-  });
-}

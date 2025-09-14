@@ -58,6 +58,14 @@ async function changeTheNodeIdFromProperty(nodeId, properties) {
 }
 
 export async function checkElementsProperties() {
+  if (States.METRICS.contentSize.width != 1536) {
+    PANEL.emptyLine();
+    PANEL.add("要素のプロパティチェック", "title");
+    PANEL.add('チェックはPC版だけです');
+    States.CHECK_ELEMENTS_PROPERTIES_MESSAGE = 'チェックはPC版だけです';
+    return;
+  }
+
   PANEL.emptyLine();
   PANEL.add("要素のプロパティチェック（背景色、境界線幅・色、境界角丸、高さ・幅）", "title");
   const noticeMessage = `<p class="property-notice">【注意】<br>

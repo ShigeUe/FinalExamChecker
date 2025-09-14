@@ -13,4 +13,8 @@ export class States
 
   static MODEL_DATA;
   static METRICS;
+  static SOURCE_HTML;
+  static SOURCE_CSS;
+  static SOURCE_JS;
+  static SLICK;
 }

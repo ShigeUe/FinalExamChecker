@@ -3,7 +3,7 @@ import { initDebug, startDebugger, finishDebug } from "./debugger.js";
 import { checkAppVersion } from "./version_check.js";
 import { PANEL } from "./output_panel.js";
 import { makeCheckerWindow } from "./make_checker_window.js";
-import { wait, getResource } from "./utils.js";
+import { wait } from "./utils.js";
 import { DoTheFirstCheck } from "./checkers/text_checker.js";
 import { checkElementsProperties } from "./checkers/style_checker.js";
 import { findPositionedElements } from "./checkers/position_checker.js";
@@ -38,32 +38,15 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
   // ターゲットを初期化
   await initDebug();
-  if (States.METRICS.contentSize.width == 1536) {
-    await checkElementsProperties();
-  }
-  else {
-    PANEL.emptyLine();
-    PANEL.add("要素のプロパティチェック", "title");
-    PANEL.add('チェックはPC版だけです');
-    States.CHECK_ELEMENTS_PROPERTIES_MESSAGE = 'チェックはPC版だけです';
-  }
-
+  await checkElementsProperties();
   // チェック本体
-  const slick = await DoTheFirstCheck();
+  States.SLICK = await DoTheFirstCheck();
   await findPositionedElements();
   await wait(100);
   PANEL.makeToc();
 
-  // HTMLの取得
-  const html = await getResource('index.html');
-  // style.cssの取得
-  const css = await getResource('style.css');
-  // main.jsの取得
-  const js = await getResource('main.js');
-
-
   // チェッカー用ウィンドウ表示
-  await makeCheckerWindow(html, css, js, slick);
+  await makeCheckerWindow();
   finishDebug();
 
   await wait(100);
@@ -72,6 +55,19 @@ document.getElementById("checker").addEventListener("click", async (e) => {
 
 chrome.debugger.onDetach.addListener(() => {
   States.ATTACHED = false;
+});
+
+// ロード時にリソースを取得する
+chrome.devtools.network.onRequestFinished.addListener((req) => {
+  if (req.request.url.match(/\/index.html/)) {
+    req.getContent((content) => States.SOURCE_HTML = content);
+  }
+  if (req.request.url.match(/\/style.css/)) {
+    req.getContent((content) => States.SOURCE_CSS = content);
+  }
+  if (req.request.url.match(/\/main.js/)) {
+    req.getContent((content) => States.SOURCE_JS = content);
+  }
 });
 
 // --------------------
@@ -87,5 +83,5 @@ chrome.debugger.onDetach.addListener(() => {
   }
 })();
 
-// 一度リロードしないとHTMLが取得できない
+// 一度リロードしてリソースを取得させる
 chrome.devtools.inspectedWindow.reload();
