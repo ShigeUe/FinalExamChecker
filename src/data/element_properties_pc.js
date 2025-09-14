@@ -1,5 +1,5 @@
 // スクロールしながら比較するのでyで整列してください
-ELEMENT_PROPERTIES_PC = [
+export const ELEMENT_PROPERTIES_PC = [
   {
     name: "ヘッダー", x: 450, y: 50, properties: [
       { type: "background-color", value: "rgb(0, 121, 242)" },

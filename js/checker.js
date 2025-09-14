@@ -157,7 +157,7 @@
       write(`<span class="blue">エラーはありません</span>`, true);
     }
 
-    comment('■Googleフォントチェック', 'Noto Sans JPの400,700または100..900、Poppinsの通常700,800,斜体700,800が必要です。');
+    comment('■Googleフォントチェック', 'Noto Sans JPの400,700または100..900、Poppinsの通常700,800,斜体700,800または通常・斜体の全てが必要です。');
     const googleFonts = doc.querySelectorAll('link[href^="https://fonts.googleapis.com/"]');
     let fontFamilyError = false;
     if (googleFonts.length === 0) {
@@ -178,7 +178,10 @@
           googleFontNotoSansOK = (f == 'Noto Sans JP:wght@400;700' || f == 'Noto Sans JP:wght@100..900');
         }
         if (f.match('Poppins')) {
-          googleFontPoppinsOK = (f == 'Poppins:ital,wght@0,700;0,800;1,700;1,800');
+          googleFontPoppinsOK = (
+            f == 'Poppins:ital,wght@0,700;0,800;1,700;1,800' ||
+            f == 'Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900'
+          );
         }
       }
     });

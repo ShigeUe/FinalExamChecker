@@ -1,4 +1,4 @@
-const HIGHLIGHTCONFIG = {
+export const HIGHLIGHTCONFIG = {
   "showInfo": true,
   "showRulers": false,
   "showStyles": false,

@@ -1,6 +1,8 @@
 import { States } from "./states.class.js";
 import { PANEL } from "./output_panel.js";
 import { inspectedWindowEval, wait } from "./utils.js";
+import { MODEL_DATA_PC } from "./data/model_data_pc.js";
+import { MODEL_DATA_SP } from "./data/model_data_sp.js";
 
 export async function dbggr(command, option) {
   if (!States.ATTACHED) {

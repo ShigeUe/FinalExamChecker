@@ -1,4 +1,4 @@
-const MODEL_DATA_PC = [
+export const MODEL_DATA_PC = [
   {
     "nodeValue": "コース案内",
     "box": [

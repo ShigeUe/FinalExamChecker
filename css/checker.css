@@ -47,6 +47,7 @@ pre {
     font-size: 0.75rem;
     font-family: "Roboto Mono", "Noto Sans JP";
     white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .mt1 {

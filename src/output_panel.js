@@ -1,5 +1,6 @@
 import { States } from "./states.class.js";
 import { dbggr } from "./debugger.js";
+import { HIGHLIGHTCONFIG } from "./data/highlight_config.js";
 
 function makeHash(text) {
   const uint8 = new TextEncoder().encode(text)
@@ -20,7 +21,8 @@ export const PANEL = {
       div.innerHTML = "&nbsp;";
     }
 
-    if (type == "error" || type == "info" || type == "title" || type == "emphasis" || type == 'notice') {
+    const classTypes = ["error", "info", "title", "emphasis", "notice"];
+    if (classTypes.includes(type)) {
       div.classList.add(type);
       if (type == 'title') {
         const hash = "ID" + makeHash(str);
@@ -44,7 +46,7 @@ export const PANEL = {
         await dbggr("Overlay.hideHighlight");
       }
     });
-    div.innerHTML = str;
+    div.innerText = str;
     div.classList.add('position-relative')
     this.element.append(div);
     window.scrollTo(0, document.body.scrollHeight);
